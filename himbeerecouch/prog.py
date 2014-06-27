@@ -8,7 +8,7 @@ import sys
 import datetime
 import json
 import socket
-from .util import Daemon, getmacid, getpassword
+from .util import Daemon, getmacid, getpassword, blink_leds, stop_blinking
 
 _should_quit = False
 _listen_should_quit = False
@@ -185,6 +185,7 @@ def receive_broadcast_message(timeout=1000):
     """
       Receives broadcast message and returns MAC id and password
     """
+    v = blink_leds() 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('<broadcast>', _broadcast_port))
     s.settimeout(timeout)
@@ -192,4 +193,5 @@ def receive_broadcast_message(timeout=1000):
     msg, addr = s.recvfrom(1024)
     dic = json.loads(msg)
     s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())), addr)
+    stop_blinking(v)
     return dic['server']
