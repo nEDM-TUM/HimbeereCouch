@@ -190,7 +190,10 @@ def receive_broadcast_message(timeout=1000):
     s.bind(('<broadcast>', _broadcast_port))
     s.settimeout(timeout)
     
-    msg, addr = s.recvfrom(1024)
+    try:
+        msg, addr = s.recvfrom(1024)
+    except socket.timeout:
+        return None
     dic = json.loads(msg)
     s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())), addr)
     stop_blinking(v)
