@@ -170,7 +170,7 @@ def blink_leds():
       Blink the leds on the RPi
     """
     try:
-        import RPs.GPIO as GPIO
+        import RPi.GPIO as GPIO
     except:
         raise Exception("Only available ON Raspberry Pi")
 
