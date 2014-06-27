@@ -191,5 +191,5 @@ def receive_broadcast_message(timeout=1000):
     
     msg, addr = s.recvfrom(1024)
     dic = json.loads(msg)
-    s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())))
+    s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())), addr)
     return dic['server']
