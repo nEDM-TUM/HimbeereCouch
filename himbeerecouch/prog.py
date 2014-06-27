@@ -13,6 +13,7 @@ from .util import Daemon, getmacid, getpassword, blink_leds, stop_blinking
 _should_quit = False
 _listen_should_quit = False
 _broadcast_port = 53000
+_server = None
 
 _export_cmds = ["should_quit", "log", "get_acct"]
 
@@ -144,9 +145,11 @@ class RaspberryDaemon(Daemon):
         t.join()
 
 def run_daemon(cmd, server, apath):
-    daemon = RaspberryDaemon(apath + 'daemon-example.pid', 
-                             stdout=apath + 'daemon-example.log', 
-                             stderr=apath + 'daemon-example.err')
+    global _server
+    daemon = RaspberryDaemon(apath + 'rspby_daemon.pid', 
+                             stdout=apath + 'rspby_daemon.log', 
+                             stderr=apath + 'rspby_daemon.err')
+    _server = server
     if 'start' == cmd:
         daemon.start()
     elif 'stop' == cmd:
