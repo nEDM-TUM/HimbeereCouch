@@ -186,7 +186,7 @@ def receive_broadcast_message(timeout=1000):
       Receives broadcast message and returns MAC id and password
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('<broadcast>', port))
+    s.bind(('<broadcast>', _broadcast_port))
     s.settimeout(timeout)
     
     msg, addr = s.recvfrom(1024)
