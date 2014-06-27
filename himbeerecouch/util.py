@@ -182,9 +182,9 @@ def blink_leds():
         
         while t.is_set():
             GPIO.output(16, GPIO.LOW)
-            sleep(0.4)
+            time.sleep(0.4)
             GPIO.output(16, GPIO.HIGH)
-            sleep(0.4)
+            time.sleep(0.4)
 
     o = threading.Event()
     o.set()
