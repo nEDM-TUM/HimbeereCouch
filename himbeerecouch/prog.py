@@ -8,6 +8,7 @@ import sys
 import datetime
 import json
 import socket
+import os
 from .util import Daemon, getmacid, getpassword, blink_leds, stop_blinking
 
 _should_quit = False
@@ -63,6 +64,10 @@ def listen_daemon(lock_obj):
         listen_daemon(lock_obj)
      
 class RaspberryDaemon(Daemon):
+    def __init__(self, pid_file, server_file="", **kwargs):
+        Daemon.__init__(self, pid_file, **kwargs)
+        self.server_file = server_file
+
     def run_as_daemon(self, lo):
 
         def add_code(adoc):
@@ -119,12 +124,35 @@ class RaspberryDaemon(Daemon):
             for t in del_list: threads.remove(t) 
 
     def run(self):
-        global _should_quit
+        global _should_quit, _server
         def handler(*args):
             global _should_quit, _listen_should_quit
             if not _should_quit: log("Quit requested")
             _listen_should_quit = True
             _should_quit = True
+
+        def _listen_for_new_server(o, restart_if_True=False):
+            asrv = receive_broadcast_message(120)
+            if not asrv:
+                return False
+            open(o.server_file, "w").write(asrv["server"])
+            if restart_if_True:
+                o.restart()
+            return True
+
+
+        threads = []
+        if not os.path.exists(self.server_file):
+            if not _listen_for_new_server(self.server_file):
+                return
+        else:
+            t = _th.Thread(target=_listen_for_new_server, args=(self, True))
+            t.start()
+            threads.append(t)
+
+
+        _server = open(self.server_file).read()
+
 
         signal.signal(signal.SIGTERM, handler)
         signal.signal(signal.SIGINT, handler)
@@ -132,6 +160,7 @@ class RaspberryDaemon(Daemon):
         lock_obj = { "lock" : _th.Lock(), "ids" : [] }
         t = _th.Thread(target=listen_daemon, args=(lock_obj,))
         t.start()
+        threads.append(t)
         while 1:
             try:
                 log("Starting...")
@@ -143,14 +172,13 @@ class RaspberryDaemon(Daemon):
                 _should_quit = False
                 log("Pausing before restart....")
                 time.sleep(5)
-        t.join()
+        for t in threads: t.join()
 
-def run_daemon(cmd, server, apath):
-    global _server
+def run_daemon(cmd, sf, apath):
     daemon = RaspberryDaemon(apath + 'rspby_daemon.pid', 
                              stdout=apath + 'rspby_daemon.log', 
-                             stderr=apath + 'rspby_daemon.err')
-    _server = server
+                             stderr=apath + 'rspby_daemon.err',
+                             server_file=sf)
     if 'start' == cmd:
         daemon.start()
     elif 'stop' == cmd:
