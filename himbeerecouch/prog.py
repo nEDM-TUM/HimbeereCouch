@@ -135,7 +135,7 @@ class RaspberryDaemon(Daemon):
             asrv = receive_broadcast_message(120)
             if not asrv:
                 return False
-            open(o.server_file, "w").write(asrv["server"])
+            open(o.server_file, "w").write(asrv)
             if restart_if_True:
                 o.restart()
             return True
