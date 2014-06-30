@@ -193,13 +193,19 @@ def receive_broadcast_message(timeout=1000):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('<broadcast>', _broadcast_port))
     s.settimeout(timeout)
+
+    def _handler(*args):
+       pass
+
+    oh = signal.signal(signal.SIGTERM, _handler)
     
     try:
         msg, addr = s.recvfrom(1024)
         dic = json.loads(msg)
         s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())), addr)
         return dic['server']
-    except socket.timeout:
+    except:
         return None
     finally:
         stop_blinking(v)
+        signal.signal(signal.SIGTERM, oh)
