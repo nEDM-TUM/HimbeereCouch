@@ -143,7 +143,7 @@ class RaspberryDaemon(Daemon):
 
         threads = []
         if not os.path.exists(self.server_file):
-            if not _listen_for_new_server(self.server_file):
+            if not _listen_for_new_server(self):
                 return
         else:
             t = _th.Thread(target=_listen_for_new_server, args=(self, True))
