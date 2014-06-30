@@ -22,7 +22,8 @@ def should_quit():
 
 def get_acct():
     acct = cloudant.Account(_server)
-    assert acct.login(getmacid(), getpassword()).status_code == 200
+    if acct.login(getmacid(), getpassword()).status_code == 200:
+        raise Exception("Server (%s) credentials invalid!" % _server)
     return acct
 
 def log(args):
