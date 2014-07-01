@@ -201,28 +201,41 @@ def run_daemon(cmd, sf, apath):
     else:
         print "usage: start|stop|restart|reload"
 
-def broadcast_message(server_name):
+def broadcast_message(server_name="", send_data=None, timeout=10):
     """
       Broadcasts the desired couchdb server name to listening Raspberry Pis 
       
       Waits and returns responses from any connected RPs.
     """
+
+    # Set up the socket
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('', 0))
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     
-    send_data = json.dumps(dict(server=server_name))
-    print "Broadcasting... :" + send_data
+    # determine what we're sending
+    if not send_data:
+        send_data = json.dumps(dict(server=server_name))
+    else:
+        send_data = json.dumps(send_data)
+
+    if len(send_data) > _max_broadcast_packet:
+        raise Exception("Length of sent data (%i) exceeds max (%i)" % (len(send_data), _max_broadcast_packet))
+
     s.sendto(send_data, ('<broadcast>', _broadcast_port))
 
-    s.settimeout(10)
-    list_of_devices = [] 
+    s.settimeout(timeout)
+
+    list_of_devices = {}
     while 1:
         try:
             msg, addr = s.recvfrom(_max_broadcast_packet)
+            list_of_devices[addr] = msg
         except socket.timeout: 
             break
-        list_of_devices.append((json.loads(msg), addr))
+    for k in list_of_devices:
+        list_of_devices[k] = json.loads(list_of_devices[k])
+
     return list_of_devices
      
 
