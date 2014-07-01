@@ -129,12 +129,12 @@ class RaspberryDaemon(Daemon):
 
         def _handler(sn, *args):
             global _should_quit, _is_reloading
-            _should_quit = True
             if sn == signal.SIGHUP:
                 log("Reload requested")
                 _is_reloading = True
             elif not _should_quit:
                 log("Quit requested")
+            _should_quit = True
 
         def _listen_for_new_server(o, to):
             asrv = receive_broadcast_message(to)
