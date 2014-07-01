@@ -13,6 +13,7 @@ from .util import Daemon, getmacid, getpassword, blink_leds, stop_blinking
 
 _should_quit = False
 _broadcast_port = 53000
+_max_broadcast_packet = 65000
 _is_reloading = False
 _server = None
 
@@ -218,7 +219,7 @@ def broadcast_message(server_name):
     list_of_devices = [] 
     while 1:
         try:
-            msg, addr = s.recvfrom(1024) 
+            msg, addr = s.recvfrom(_max_broadcast_packet)
         except socket.timeout: 
             break
         list_of_devices.append((json.loads(msg), addr))
@@ -247,7 +248,7 @@ def receive_broadcast_message(timeout=1000):
     log("Wait for broadcast...")
     while 1:
         try:
-            msg, addr = s.recvfrom(1024)
+            msg, addr = s.recvfrom(_max_broadcast_packet)
             dic = json.loads(msg)
             if "server" in dic:
                 s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())), addr)
