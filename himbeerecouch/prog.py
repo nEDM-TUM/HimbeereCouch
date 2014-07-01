@@ -278,6 +278,9 @@ def receive_broadcast_message(timeout=1000):
                     except Exception as e:
                         dic["ret"] = (None,repr(e))
                     finally:
+                        astr = json.dumps(dic)
+                        if len(astr) > _max_broadcast_packet:
+                            raise Exception("Length of sent data (%i) exceeds max (%i)" % (len(astr), _max_broadcast_packet))
                         s.sendto(json.dumps(dic), addr) 
         except Exception as e:
             if e.__class__ == socket.timeout:
