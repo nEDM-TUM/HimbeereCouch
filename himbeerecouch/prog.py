@@ -159,9 +159,8 @@ class RaspberryDaemon(Daemon):
         _server = open(self.server_file).read()
 
 
-        signal.signal(signal.SIGTERM, handler)
-        signal.signal(signal.SIGINT, handler)
-        signal.signal(signal.SIGHUP, handler)
+        for s in [signal.SIGINT, signal.SIGINT, signal.SIGHUP]:
+            signal.signal(s, _handler)
 
         lock_obj = { "lock" : _th.Lock(), "ids" : [], "obj" : self }
         t = _th.Thread(target=listen_daemon, args=(lock_obj,))
@@ -185,9 +184,10 @@ class RaspberryDaemon(Daemon):
             return self.run()
 
 def run_daemon(cmd, sf, apath):
-    daemon = RaspberryDaemon(apath + 'rspby_daemon.pid', 
-                             stdout=apath + 'rspby_daemon.log', 
-                             stderr=apath + 'rspby_daemon.err',
+    join = os.path.join
+    daemon = RaspberryDaemon(join(apath, 'rspby_daemon.pid'),
+                             stdout=join(apath, 'rspby_daemon.log'),
+                             stderr=join(apath, 'rspby_daemon.err'),
                              server_file=sf)
     if 'start' == cmd:
         daemon.start()
@@ -195,8 +195,10 @@ def run_daemon(cmd, sf, apath):
         daemon.stop()
     elif 'restart' == cmd:
         daemon.restart()
+    elif 'reload' == cmd:
+        daemon.reload()
     else:
-        print "usage: start|stop|restart" 
+        print "usage: start|stop|restart|reload"
 
 def broadcast_message(server_name):
     """
