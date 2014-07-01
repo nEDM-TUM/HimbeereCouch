@@ -12,7 +12,6 @@ import os
 from .util import Daemon, getmacid, getpassword, blink_leds, stop_blinking
 
 _should_quit = False
-_listen_should_quit = False
 _broadcast_port = 53000
 _is_reloading = False
 _server = None
@@ -35,7 +34,6 @@ def log(args):
 
 def listen_daemon(lock_obj):
     try:
-        global _should_quit
         acct = get_acct()
         adb = acct["nedm_head"]
         ch = adb.changes(params=dict(feed='continuous',
@@ -46,7 +44,7 @@ def listen_daemon(lock_obj):
                                      handle_deleted=True),
                                      emit_heartbeats=True)
         for l in ch:
-            if l is None and _listen_should_quit: break
+            if l is None and should_quit(): break
             if l is None: continue
             # Force reload
             should_stop = False
@@ -58,7 +56,8 @@ def listen_daemon(lock_obj):
                 should_stop = True
             if should_stop: 
                 log("Forcing a restart, because new document arrived/got deleted")
-                _should_quit = True
+                lock_obj["obj"].reload() 
+                break
     except Exception as e:
         log("Exception seen: " + repr(e))
         time.sleep(5)
@@ -125,16 +124,16 @@ class RaspberryDaemon(Daemon):
             for t in del_list: threads.remove(t) 
 
     def run(self):
-        global _should_quit, _server, _is_reloading, _listen_should_quit
+        global _should_quit, _server, _is_reloading
 
-        def handler(sn, *args):
-            global _should_quit, _listen_should_quit, _is_reloading
-            if not _should_quit: log("Quit requested")
-            _listen_should_quit = True
+        def _handler(sn, *args):
+            global _should_quit, _is_reloading
             _should_quit = True
             if sn == signal.SIGHUP:
                 log("Reload requested")
                 _is_reloading = True
+            elif not _should_quit:
+                log("Quit requested")
 
         def _listen_for_new_server(o, to):
             asrv = receive_broadcast_message(to)
@@ -145,7 +144,7 @@ class RaspberryDaemon(Daemon):
             return True
 
 
-        _is_reloading, _should_quit, _listen_should_quit = False, False, False
+        _is_reloading, _should_quit  = False, False
 
         threads = []
         if not os.path.exists(self.server_file):
@@ -164,22 +163,26 @@ class RaspberryDaemon(Daemon):
         signal.signal(signal.SIGINT, handler)
         signal.signal(signal.SIGHUP, handler)
 
-        lock_obj = { "lock" : _th.Lock(), "ids" : [] }
+        lock_obj = { "lock" : _th.Lock(), "ids" : [], "obj" : self }
         t = _th.Thread(target=listen_daemon, args=(lock_obj,))
         t.start()
         threads.append(t)
-        while 1:
-            try:
-                log("Starting...")
-                self.run_as_daemon(lock_obj)
-                if _listen_should_quit: break
-            except Exception as e:
-                log("Received exception: " + repr(e))
-            finally:
-                _should_quit = False
-                log("Pausing before restart....")
-                time.sleep(5)
+
+        log("Starting, with server: %s" % _server)
+        try:
+            self.run_as_daemon(lock_obj)
+        except Exception as e:
+            log("Received exception: " + repr(e))
+
+        while not should_quit():
+            time.sleep(1.0)
+
         for t in threads: t.join()
+
+        # If we need to reload, then recall this function
+        if _is_reloading: 
+            log("Reloading...")
+            return self.run()
 
 def run_daemon(cmd, sf, apath):
     daemon = RaspberryDaemon(apath + 'rspby_daemon.pid', 
@@ -262,7 +265,7 @@ def receive_broadcast_message(timeout=1000):
                         s.sendto(json.dumps(dic), addr) 
         except Exception as e:
             if e.__class__ == socket.timeout:
-                if _listen_should_quit: return None
+                if should_quit(): return None
                 if timeout <= 0: continue 
                 total_timeout -= 1.0
                 if total_timeout > 0: continue
