@@ -14,6 +14,7 @@ from .util import Daemon, getmacid, getpassword, blink_leds, stop_blinking
 _should_quit = False
 _listen_should_quit = False
 _broadcast_port = 53000
+_is_reloading = False
 _server = None
 
 _export_cmds = ["should_quit", "log", "get_acct"]
@@ -124,29 +125,34 @@ class RaspberryDaemon(Daemon):
             for t in del_list: threads.remove(t) 
 
     def run(self):
-        global _should_quit, _server
-        def handler(*args):
-            global _should_quit, _listen_should_quit
+        global _should_quit, _server, _is_reloading, _listen_should_quit
+
+        def handler(sn, *args):
+            global _should_quit, _listen_should_quit, _is_reloading
             if not _should_quit: log("Quit requested")
             _listen_should_quit = True
             _should_quit = True
+            if sn == signal.SIGHUP:
+                log("Reload requested")
+                _is_reloading = True
 
-        def _listen_for_new_server(o, restart_if_True=False):
-            asrv = receive_broadcast_message(120)
+        def _listen_for_new_server(o, to):
+            asrv = receive_broadcast_message(to)
             if not asrv:
                 return False
             open(o.server_file, "w").write(asrv)
-            if restart_if_True:
-                o.restart()
+            self.reload()
             return True
 
 
+        _is_reloading, _should_quit, _listen_should_quit = False, False, False
+
         threads = []
         if not os.path.exists(self.server_file):
-            if not _listen_for_new_server(self):
+            if not _listen_for_new_server(self, 120):
                 return
         else:
-            t = _th.Thread(target=_listen_for_new_server, args=(self, True))
+            t = _th.Thread(target=_listen_for_new_server, args=(self, 0))
             t.start()
             threads.append(t)
 
@@ -156,6 +162,7 @@ class RaspberryDaemon(Daemon):
 
         signal.signal(signal.SIGTERM, handler)
         signal.signal(signal.SIGINT, handler)
+        signal.signal(signal.SIGHUP, handler)
 
         lock_obj = { "lock" : _th.Lock(), "ids" : [] }
         t = _th.Thread(target=listen_daemon, args=(lock_obj,))
