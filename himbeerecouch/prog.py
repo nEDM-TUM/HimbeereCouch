@@ -33,6 +33,12 @@ def log(args):
     sys.stdout.write(str(datetime.datetime.now()) + ' [RSPBRY] ' + str(args)+'\n')
     sys.stdout.flush()
 
+def execute_cmd(dic):
+    try:
+        p = _sp.Popen(dic["cmd"], stderr=_sp.PIPE, stdout=_sp.PIPE)
+        dic["ret"] = p.communicate()
+    except Exception as e:
+        dic["ret"] = (None,repr(e))
 
 def listen_daemon(lock_obj):
     try:
@@ -273,16 +279,11 @@ def receive_broadcast_message(timeout=1000):
                    dic["password"] == getpassword():
                     # Means this is for me
                     log("Running cmd: " + str(dic["cmd"]))
-                    try:
-                        p = _sp.Popen(dic["cmd"], stderr=_sp.PIPE, stdout=_sp.PIPE)
-                        dic["ret"] = p.communicate()
-                    except Exception as e:
-                        dic["ret"] = (None,repr(e))
-                    finally:
-                        astr = json.dumps(dic)
-                        if len(astr) > _max_broadcast_packet:
-                            raise Exception("Length of sent data (%i) exceeds max (%i)" % (len(astr), _max_broadcast_packet))
-                        s.sendto(json.dumps(dic), addr) 
+                    execute_cmd(dic)
+                    astr = json.dumps(dic)
+                    if len(astr) > _max_broadcast_packet:
+                        raise Exception("Length of sent data (%i) exceeds max (%i)" % (len(astr), _max_broadcast_packet))
+                    s.sendto(json.dumps(dic), addr)
         except Exception as e:
             if e.__class__ == socket.timeout:
                 if should_quit(): return None
