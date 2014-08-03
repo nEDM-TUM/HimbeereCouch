@@ -19,6 +19,8 @@ _server = None
 _database_name = "nedm%2Fraspberries"
 
 _export_cmds = ["should_quit", "log", "get_acct"]
+_current_log = []
+_current_log_lock = _th.Lock()
 
 def should_quit(): 
     return _should_quit
@@ -30,8 +32,30 @@ def get_acct():
     return acct
 
 def log(args):
-    sys.stdout.write(str(datetime.datetime.now()) + ' [RSPBRY] ' + str(args)+'\n')
+    global _current_log
+    alog = [str(datetime.datetime.utcnow()), str(args)]
+    sys.stdout.write(' [RSPBRY] '.join(alog)+'\n')
     sys.stdout.flush()
+
+    # Put in the queue to be written
+    _current_log_lock.acquire()
+    _current_log.append(alog)
+    _current_log_lock.release()
+
+def flush_log_to_db(db):
+    global _current_log
+    # Grab the current log
+    _current_log_lock.acquire()
+    thelog = _current_log
+    _current_log = []
+    _current_log_lock.release()
+
+    if len(thelog) == 0: return
+    db.design("raspberry_def").put(
+        "_update/update_log/%s_log?remove_since=50000" % str(getmacid()),
+        params=dict(log=thelog))
+
+
 
 def execute_cmd(dic):
     import subprocess as _sp
@@ -55,7 +79,9 @@ def listen_daemon(lock_obj):
                                      emit_heartbeats=True)
         for l in ch:
             if l is None and should_quit(): break
-            if l is None: continue
+            if l is None:
+                flush_log_to_db(adb)
+                continue
             # Force reload
             should_stop = False
             if "deleted" in l:
