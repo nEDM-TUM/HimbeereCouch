@@ -44,7 +44,7 @@ def listen_daemon(lock_obj):
     try:
         acct = get_acct()
         adb = acct[_database_name]
-        mi = getmacid()
+        mi = str(getmacid())
         ch = adb.changes(params=dict(feed='continuous',
                                      heartbeat=5000,
                                      since='now',
