@@ -22,7 +22,7 @@ _export_cmds = ["should_quit", "log", "get_acct"]
 _current_log = []
 _current_log_lock = _th.Lock()
 
-def should_quit(): 
+def should_quit():
     return _should_quit
 
 def get_acct():
@@ -98,15 +98,15 @@ def listen_daemon(lock_obj):
                      changed_doc.put(params=t)
                 else:
                      should_stop = True
-            if should_stop: 
+            if should_stop:
                 log("Forcing a restart, because new document arrived/got deleted")
-                lock_obj["obj"].reload() 
+                lock_obj["obj"].reload()
                 break
     except Exception as e:
         log("Exception seen: " + repr(e))
         time.sleep(5)
         listen_daemon(lock_obj)
-     
+
 class RaspberryDaemon(Daemon):
     def __init__(self, pid_file, server_file="", **kwargs):
         Daemon.__init__(self, pid_file, **kwargs)
@@ -118,7 +118,7 @@ class RaspberryDaemon(Daemon):
             """
               add_code is a helper function to build a module from code
             """
-            anid = adoc['_id'] 
+            anid = adoc['_id']
             adoc['mod'] = imp.new_module(anid)
             am = adoc['mod']
             exec adoc['code'] in am.__dict__
@@ -128,7 +128,7 @@ class RaspberryDaemon(Daemon):
 
         def start_thread(adaemon):
             """
-              start an independent thread  
+              start an independent thread
             """
             def _daemon_func(amod, retval):
                 try:
@@ -137,7 +137,7 @@ class RaspberryDaemon(Daemon):
                     retval['error'] = repr(e)
                 if not 'error' in retval:
                     retval['ok'] = True
-        
+
             q = {}
             t=_th.Thread(target=_daemon_func, args=(adaemon['mod'], q))
             t.start()
@@ -148,24 +148,24 @@ class RaspberryDaemon(Daemon):
         acct = get_acct()
         db = acct[_database_name]
         aview = db.design("document_type").view("document_type")
-        res = aview.get(params=dict(startkey=[getmacid()], 
-                                    endkey=[getmacid(), {}], 
-                                    include_docs=True, 
+        res = aview.get(params=dict(startkey=[getmacid()],
+                                    endkey=[getmacid(), {}],
+                                    include_docs=True,
                                     reduce=False)).json()
-   
+
         daemons = dict([add_code(r['doc']) for r in res['rows']])
         threads = [start_thread(v) for _,v in daemons.items()]
 
         lo['lock'].acquire()
         lo['ids'] = [d['_id'] for d in daemons.values()]
         lo['lock'].release()
-    
+
         while len(threads) > 0:
             del_list = []
-            for t in threads: 
+            for t in threads:
                 t.join(0.2)
                 if not t.isAlive(): del_list.append(t)
-            for t in del_list: threads.remove(t) 
+            for t in del_list: threads.remove(t)
 
     def run(self):
         global _should_quit, _server, _is_reloading
@@ -223,7 +223,7 @@ class RaspberryDaemon(Daemon):
         for t in threads: t.join()
 
         # If we need to reload, then recall this function
-        if _is_reloading: 
+        if _is_reloading:
             log("Reloading...")
             return self.run()
 
@@ -246,8 +246,8 @@ def run_daemon(cmd, sf, apath):
 
 def broadcast_message(server_name="", send_data=None, timeout=10):
     """
-      Broadcasts the desired couchdb server name to listening Raspberry Pis 
-      
+      Broadcasts the desired couchdb server name to listening Raspberry Pis
+
       Waits and returns responses from any connected RPs.
     """
 
@@ -255,7 +255,7 @@ def broadcast_message(server_name="", send_data=None, timeout=10):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('', 0))
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    
+
     # determine what we're sending
     if not send_data:
         send_data = json.dumps(dict(server=server_name))
@@ -274,19 +274,19 @@ def broadcast_message(server_name="", send_data=None, timeout=10):
         try:
             msg, addr = s.recvfrom(_max_broadcast_packet)
             list_of_devices[addr] = msg
-        except socket.timeout: 
+        except socket.timeout:
             break
     for k in list_of_devices:
         list_of_devices[k] = json.loads(list_of_devices[k])
 
     return list_of_devices
-     
+
 
 def receive_broadcast_message(timeout=1000):
     """
       Receives broadcast message and returns MAC id and password
     """
-    v = blink_leds() 
+    v = blink_leds()
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('<broadcast>', _broadcast_port))
     total_timeout = timeout
@@ -299,7 +299,7 @@ def receive_broadcast_message(timeout=1000):
            pass
         oh = signal.signal(signal.SIGTERM, _handler)
     except: pass
-    
+
     log("Wait for broadcast...")
     while 1:
         try:
@@ -309,7 +309,7 @@ def receive_broadcast_message(timeout=1000):
                 s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())), addr)
                 log("Received...")
                 return dic['server']
-            elif all(k in dic for k in ("MacID", "password", "cmd")): 
+            elif all(k in dic for k in ("MacID", "password", "cmd")):
                 if dic["MacID"] == getmacid() and \
                    dic["password"] == getpassword():
                     # Means this is for me
@@ -322,7 +322,7 @@ def receive_broadcast_message(timeout=1000):
         except Exception as e:
             if e.__class__ == socket.timeout:
                 if should_quit(): return None
-                if timeout <= 0: continue 
+                if timeout <= 0: continue
                 total_timeout -= 1.0
                 if total_timeout > 0: continue
                 log("Timed out...")
