@@ -16,6 +16,7 @@ _broadcast_port = 53000
 _max_broadcast_packet = 65000
 _is_reloading = False
 _server = None
+_database_name = "nedm%2Fraspberries"
 
 _export_cmds = ["should_quit", "log", "get_acct"]
 
@@ -36,7 +37,7 @@ def log(args):
 def listen_daemon(lock_obj):
     try:
         acct = get_acct()
-        adb = acct["nedm_head"]
+        adb = acct[_database_name]
         ch = adb.changes(params=dict(feed='continuous',
                                      heartbeat=5000,
                                      since='now',
@@ -103,7 +104,7 @@ class RaspberryDaemon(Daemon):
 
 
         acct = get_acct()
-        db = acct["nedm_head"]
+        db = acct[_database_name]
         aview = db.design("document_type").view("document_type")
         res = aview.get(params=dict(startkey=[getmacid()], 
                                     endkey=[getmacid(), {}], 
