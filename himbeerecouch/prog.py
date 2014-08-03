@@ -34,11 +34,12 @@ def log(args):
     sys.stdout.flush()
 
 def execute_cmd(dic):
+    import subprocess as _sp
     try:
         p = _sp.Popen(dic["cmd"], stderr=_sp.PIPE, stdout=_sp.PIPE)
-        dic["ret"] = p.communicate()
+        dic["ret"] = list(p.communicate())
     except Exception as e:
-        dic["ret"] = (None,repr(e))
+        dic["ret"] = [None,repr(e)]
 
 def listen_daemon(lock_obj):
     try:
@@ -260,7 +261,6 @@ def receive_broadcast_message(timeout=1000):
     """
       Receives broadcast message and returns MAC id and password
     """
-    import subprocess as _sp
     v = blink_leds() 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('<broadcast>', _broadcast_port))
