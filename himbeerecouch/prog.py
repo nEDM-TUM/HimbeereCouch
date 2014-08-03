@@ -65,10 +65,10 @@ def listen_daemon(lock_obj):
                 # See if it's a cmd doc
                 changed_doc = adb[l['id']]
                 t = changed_doc.get().json()
-                log(t)
                 if t['type'] == mi + '_cmd':
                      if "ret" in t: continue
                      execute_cmd(t)
+                     log(t)
                      changed_doc.put(params=t)
                 else:
                      should_stop = True
