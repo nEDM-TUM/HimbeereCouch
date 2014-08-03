@@ -63,7 +63,7 @@ def listen_daemon(lock_obj):
                 lock_obj['lock'].release()
             else:
                 # See if it's a cmd doc
-                changed_doc = adc[l['id']]
+                changed_doc = adb[l['id']]
                 t = changed_doc.get().json()
                 log(t)
                 if t['type'] == mi + '_cmd':
