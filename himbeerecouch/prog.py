@@ -44,11 +44,12 @@ def listen_daemon(lock_obj):
     try:
         acct = get_acct()
         adb = acct[_database_name]
+        mi = getmacid()
         ch = adb.changes(params=dict(feed='continuous',
                                      heartbeat=5000,
                                      since='now',
                                      filter='nedm_default/doc_type',
-                                     type=getmacid(),
+                                     type=[mi, mi+"_cmd"],
                                      handle_deleted=True),
                                      emit_heartbeats=True)
         for l in ch:
@@ -61,7 +62,15 @@ def listen_daemon(lock_obj):
                 if l['id'] in lock_obj['ids']: should_stop = True
                 lock_obj['lock'].release()
             else:
-                should_stop = True
+                # See if it's a cmd doc
+                changed_doc = adc[l['id']]
+                t = changed_doc.get().json()
+                if t['type'] == mi + '_cmd':
+                     if "ret" in t: continue
+                     execute_cmd(t)
+                     changed_doc.put(params=t)
+                else:
+                     should_stop = True
             if should_stop: 
                 log("Forcing a restart, because new document arrived/got deleted")
                 lock_obj["obj"].reload() 
