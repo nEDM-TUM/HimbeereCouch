@@ -43,6 +43,9 @@ def log(args):
     _current_log_lock.release()
 
 def flush_log_to_db(db):
+    """
+      Flush the log to the database
+    """
     global _current_log
     # Grab the current log
     _current_log_lock.acquire()
@@ -55,6 +58,12 @@ def flush_log_to_db(db):
         "_update/update_log/%s_log?remove_since=50000" % str(getmacid()),
         params=dict(log=thelog))
 
+def send_heartbeat(db):
+    """
+      Update the update document
+    """
+    db.design("nedm_default").put("_update/insert_with_timestamp/%s_heartbeat" % str(getmacid()),
+      params=dict(type="heartbeat"))
 
 
 def execute_cmd(dic):
@@ -80,7 +89,9 @@ def listen_daemon(lock_obj):
         for l in ch:
             if l is None and should_quit(): break
             if l is None:
+                # Take care of housekeeping on the heartbeats
                 flush_log_to_db(adb)
+                send_heartbeat(adb)
                 continue
             # Force reload
             should_stop = False
