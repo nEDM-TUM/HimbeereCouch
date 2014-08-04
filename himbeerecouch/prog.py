@@ -104,6 +104,7 @@ def listen_daemon(lock_obj):
                 break
     except Exception as e:
         log("Exception seen: " + repr(e))
+        if should_quit(): return
         time.sleep(5)
         listen_daemon(lock_obj)
 
