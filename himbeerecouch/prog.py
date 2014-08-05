@@ -193,7 +193,10 @@ class RaspberryDaemon(Daemon):
             del_list = []
             for t in threads:
                 t.join(0.2)
-                if not t.isAlive(): del_list.append(t)
+                if not t.isAlive():
+                    if "ok" not in t.result:
+                        log("Error seen: " + str(t.result))
+                    del_list.append(t)
             for t in del_list: threads.remove(t)
 
     def run(self):
