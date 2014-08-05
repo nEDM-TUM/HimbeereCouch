@@ -18,9 +18,26 @@ _is_reloading = False
 _server = None
 _database_name = "nedm%2Fraspberries"
 
-_export_cmds = ["should_quit", "log", "get_acct"]
+_export_cmds = [
+  "should_quit",
+  "log",
+  "get_acct",
+  "register_quit_notification",
+  "remove_quit_notification"
+]
 _current_log = []
 _current_log_lock = _th.Lock()
+_should_quit_notifiers = set()
+
+def register_quit_notification(afunc):
+    if not afunc: return
+    _should_quit_notifiers.add(afunc)
+
+def remove_quit_notification(afunc):
+    if not afunc: return
+    try:
+        _should_quit_notifiers.remove(afunc)
+    except KeyError: pass
 
 def should_quit():
     return _should_quit
@@ -190,6 +207,7 @@ class RaspberryDaemon(Daemon):
             elif not _should_quit:
                 log("Quit requested")
             _should_quit = True
+            for f in _should_quit_notifiers: f()
 
         def _listen_for_new_server(o, to):
             asrv = receive_broadcast_message(to)
