@@ -20,7 +20,6 @@ _database_name = "nedm%2Fraspberries"
 
 _export_cmds = [
   "should_quit",
-  "log",
   "get_acct",
   "register_quit_notification",
   "remove_quit_notification"
@@ -48,9 +47,12 @@ def get_acct():
         raise Exception("Server (%s) credentials invalid!" % _server)
     return acct
 
-def log(args):
+def log(*args, **kwargs):
     global _current_log
-    alog = [str(datetime.datetime.utcnow()), str(args)]
+    a = list(args)
+    if kwargs.get("thread_label"):
+        a.insert(0, kwargs["thread_label"])
+    alog = [str(datetime.datetime.utcnow()), " ".join(map(str,a))]
     sys.stdout.write(' [RSPBRY] '.join(alog)+'\n')
     sys.stdout.flush()
 
@@ -58,6 +60,11 @@ def log(args):
     _current_log_lock.acquire()
     _current_log.append(alog)
     _current_log_lock.release()
+
+def _gen_log(alabel):
+    def _f(*args):
+        return log(*args, thread_label=alabel)
+    return _f
 
 def flush_log_to_db(db):
     """
@@ -153,6 +160,7 @@ class RaspberryDaemon(Daemon):
             exec adoc['code'] in am.__dict__
             for cmd in _export_cmds:
                 am.__dict__[cmd] = globals()[cmd]
+            am.__dict__["log"] = _gen_log("[%s]" % anid)
             return anid, adoc
 
         def start_thread(adaemon):
