@@ -244,7 +244,7 @@ class RaspberryDaemon(Daemon):
         _server = open(self.server_file).read()
 
 
-        for s in [signal.SIGINT, signal.SIGINT, signal.SIGHUP]:
+        for s in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
             signal.signal(s, _handler)
 
         lock_obj = { "lock" : _th.Lock(), "ids" : [], "obj" : self }
