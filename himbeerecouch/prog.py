@@ -105,6 +105,7 @@ def listen_daemon(lock_obj):
         mi = str(getmacid())
         ch = adb.changes(params=dict(feed='continuous',
                                      heartbeat=5000,
+                                     include_docs=True,
                                      since='now',
                                      filter='nedm_default/doc_type',
                                      type=[mi, mi+"_cmd"],
@@ -125,12 +126,11 @@ def listen_daemon(lock_obj):
                 lock_obj['lock'].release()
             else:
                 # See if it's a cmd doc
-                changed_doc = adb[l['id']]
-                t = changed_doc.get().json()
+                t = l["doc"]
                 if t['type'] == mi + '_cmd':
                      if "ret" in t: continue
                      execute_cmd(t)
-                     changed_doc.put(params=t)
+                     adb.post("_bulk_docs", params=dict(docs=[t]))
                 else:
                      should_stop = True
             if should_stop:
