@@ -27,6 +27,7 @@ _export_cmds = [
 _current_log = []
 _current_log_lock = _th.Lock()
 _should_quit_notifiers = set()
+_running_ids = []
 
 def register_quit_notification(afunc):
     if not afunc: return
@@ -87,7 +88,7 @@ def send_heartbeat(db):
       Update the update document
     """
     db.design("nedm_default").put("_update/insert_with_timestamp/%s_heartbeat" % str(getmacid()),
-      params=dict(type="heartbeat"))
+      params=dict(type="heartbeat", running_ids=_running_ids))
 
 
 def execute_cmd(dic):
@@ -191,21 +192,24 @@ class RaspberryDaemon(Daemon):
                                     reduce=False)).json()
 
         daemons = dict([add_code(r['doc']) for r in res['rows']])
-        threads = [start_thread(v) for _,v in daemons.items()]
+        threads = dict([(anid, start_thread(v)) for anid,v in daemons.items()])
 
         lo['lock'].acquire()
         lo['ids'] = [d['_id'] for d in daemons.values()]
         lo['lock'].release()
 
-        while len(threads) > 0:
+        while len(threads.values()) > 0:
             del_list = []
-            for t in threads:
+            for k in threads:
+                t = threads[k]
                 t.join(0.2)
                 if not t.isAlive():
                     if "ok" not in t.result:
-                        log("Error seen: " + str(t.result))
-                    del_list.append(t)
-            for t in del_list: threads.remove(t)
+                        log("Error seen ({}) : {}".format(k, t.result))
+                    del_list.append(k)
+            for t in del_list: del threads[t]
+            global _running_ids
+            _running_ids = threads.keys()
 
     def run(self):
         global _should_quit, _server, _is_reloading
