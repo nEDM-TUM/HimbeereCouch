@@ -100,49 +100,49 @@ def execute_cmd(dic):
         dic["ret"] = [None,repr(e)]
 
 def listen_daemon(lock_obj):
-    try:
-        acct = get_acct()
-        adb = acct[_database_name]
-        mi = str(getmacid())
-        ch = adb.changes(params=dict(feed='continuous',
-                                     heartbeat=5000,
-                                     include_docs=True,
-                                     since='now',
-                                     filter='nedm_default/doc_type',
-                                     type=[mi, mi+"_cmd"],
-                                     handle_deleted=True),
-                                     emit_heartbeats=True)
-        for l in ch:
-            if l is None and should_quit(): break
-            if l is None:
-                # Take care of housekeeping on the heartbeats
-                flush_log_to_db(adb)
-                send_heartbeat(adb)
-                continue
-            # Force reload
-            should_stop = False
-            if "deleted" in l:
-                lock_obj['lock'].acquire()
-                if l['id'] in lock_obj['ids']: should_stop = True
-                lock_obj['lock'].release()
-            else:
-                # See if it's a cmd doc
-                t = l["doc"]
-                if t['type'] == mi + '_cmd':
-                     if "ret" in t: continue
-                     execute_cmd(t)
-                     adb.post("_bulk_docs", params=dict(docs=[t]))
+    while 1:
+        try:
+            acct = get_acct()
+            adb = acct[_database_name]
+            mi = str(getmacid())
+            ch = adb.changes(params=dict(feed='continuous',
+                                         heartbeat=5000,
+                                         include_docs=True,
+                                         since='now',
+                                         filter='nedm_default/doc_type',
+                                         type=[mi, mi+"_cmd"],
+                                         handle_deleted=True),
+                                         emit_heartbeats=True)
+            for l in ch:
+                if l is None and should_quit(): break
+                if l is None:
+                    # Take care of housekeeping on the heartbeats
+                    flush_log_to_db(adb)
+                    send_heartbeat(adb)
+                    continue
+                # Force reload
+                should_stop = False
+                if "deleted" in l:
+                    lock_obj['lock'].acquire()
+                    if l['id'] in lock_obj['ids']: should_stop = True
+                    lock_obj['lock'].release()
                 else:
-                     should_stop = True
-            if should_stop:
-                log("Forcing a restart, because new document arrived/got deleted")
-                lock_obj["obj"].reload()
-                break
-    except Exception as e:
-        log("Exception seen: " + repr(e))
-        if should_quit(): return
-        time.sleep(5)
-        listen_daemon(lock_obj)
+                    # See if it's a cmd doc
+                    t = l["doc"]
+                    if t['type'] == mi + '_cmd':
+                         if "ret" in t: continue
+                         execute_cmd(t)
+                         adb.post("_bulk_docs", params=dict(docs=[t]))
+                    else:
+                         should_stop = True
+                if should_stop:
+                    log("Forcing a restart, because new document arrived/got deleted")
+                    lock_obj["obj"].reload()
+                    break
+        except Exception as e:
+            log("Exception seen: " + repr(e))
+            if should_quit(): return
+            time.sleep(5)
 
 class RaspberryDaemon(Daemon):
     def __init__(self, pid_file, server_file="", **kwargs):
