@@ -99,6 +99,9 @@ def execute_cmd(dic):
     except Exception as e:
         dic["ret"] = [None,repr(e)]
 
+class ShouldExit(Exception):
+    pass
+
 def listen_daemon(lock_obj):
     while 1:
         try:
@@ -114,7 +117,7 @@ def listen_daemon(lock_obj):
                                          handle_deleted=True),
                                          emit_heartbeats=True)
             for l in ch:
-                if l is None and should_quit(): break
+                if l is None and should_quit(): raise ShouldExit()
                 if l is None:
                     # Take care of housekeeping on the heartbeats
                     flush_log_to_db(adb)
@@ -139,6 +142,8 @@ def listen_daemon(lock_obj):
                     log("Forcing a restart, because new document arrived/got deleted")
                     lock_obj["obj"].reload()
                     break
+        except ShouldExit:
+            return
         except Exception as e:
             log("Exception seen: " + repr(e))
             if should_quit(): return
