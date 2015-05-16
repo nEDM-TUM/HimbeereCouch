@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
   name='himbeerecouch',
-  version='0.0.4.dev1',
+  version='0.0.5.dev1',
   packages=['himbeerecouch'],
   url='https://github.com/nEDM-TUM/HimbeereCouch',
   author='Michael Marino',
