@@ -3,10 +3,11 @@ import logging
 import traceback
 import threading
 import multiprocessing
-from logging import StreamHandler as SH
 import atexit
 import Queue
 from .util import getmacid
+from logging import FileHandler as FH
+from logging import StreamHandler as SH
 
 _current_log = []
 _current_log_lock = threading.Lock()
@@ -38,10 +39,13 @@ class MPLogHandler(logging.Handler):
     to log to the same file by using a queue.
 
     """
-    def __init__(self):
+    def __init__(self, out_file = None):
         logging.Handler.__init__(self)
 
-        self._handler = SH()
+        if out_file is not None:
+            self._handler = FH(out_file)
+        else:
+            self._handler = SH()
         self.queue = multiprocessing.Queue(-1)
         self._shutdown = False
 
@@ -101,11 +105,19 @@ class MPLogHandler(logging.Handler):
         self._thrd.join()
         logging.Handler.close(self)
 
+
 _logger = logging.getLogger()
 _logger.setLevel(logging.INFO)
 _formatter = logging.Formatter("%(asctime)s [RSPBY/%(processName)s] %(levelname)s %(message)s")
-_handler = MPLogHandler()
-_handler.setFormatter(_formatter)
-_logger.addHandler(_handler)
+_handler = None
 log = _logger.info
 
+def set_logging_file(out_file=None):
+    global _handler
+    if _handler is not None:
+        _logger.removeHandler(_handler)
+    _handler = MPLogHandler(out_file)
+    _handler.setFormatter(_formatter)
+    _logger.addHandler(_handler)
+
+set_logging_file()

@@ -3,7 +3,8 @@ import signal
 import threading as _th
 import time
 import os
-from .util import Daemon, getmacid, getpassword
+from .daemon import Daemon
+from .util import getmacid, getpassword
 from .log import MPLogHandler, flush_log_to_db, log
 from .database import set_server, get_database, get_processes_code, send_heartbeat
 from .rpc import RaspServerProcess, start_new_process
@@ -93,7 +94,7 @@ def listen_daemon(ids, daemon):
                          raise ReloadDaemon()
         except ReloadDaemon:
             log("Forcing a restart, because new document arrived/got deleted")
-            daemon.reload()
+            daemon.reload(True)
             return
         except ShouldExit:
             return
@@ -158,7 +159,7 @@ class RaspberryDaemon(Daemon):
             if not asrv:
                 return False
             open(o.server_file, "w").write(asrv)
-            self.reload()
+            self.reload(True)
             return True
 
         check_server = None
