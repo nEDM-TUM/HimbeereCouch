@@ -3,6 +3,7 @@ import signal
 import json
 from .util import getmacid, getpassword, blink_leds, stop_blinking
 from .log import log
+import logging
 
 _broadcast_port = 53000
 _max_broadcast_packet = 65000
@@ -54,7 +55,7 @@ def broadcast_message(server_name="", send_data=None, timeout=10):
     return list_of_devices
 
 
-def receive_broadcast_message(timeout=1000):
+def receive_broadcast_message(timeout=1000, should_exit=None):
     """
       Receives broadcast message and returns MAC id and password
     """
@@ -81,15 +82,17 @@ def receive_broadcast_message(timeout=1000):
                 s.sendto(json.dumps(dict(MacID=getmacid(),password=getpassword())), addr)
                 log("Received...")
                 return dic['server']
-        except Exception as e:
-            if e.__class__ == socket.timeout:
+        except socket.timeout:
+                if should_exit is not None and should_exit():
+                    return None
                 if timeout <= 0: continue
                 total_timeout -= 1.0
                 if total_timeout > 0: continue
                 log("Timed out...")
-            else:
-                log("Exception: " + repr(e))
-            return None
+                return None
+        except:
+                logging.exception("Broadcast exception")
+                return None
         finally:
             stop_blinking(v)
             if oh: signal.signal(signal.SIGTERM, oh)
