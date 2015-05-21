@@ -6,14 +6,14 @@
 """
 
 import sys, os, time, atexit
-from signal import SIGTERM, SIGHUP 
+from signal import SIGTERM, SIGHUP
 import hashlib, uuid
-import threading 
+import threading
 
 class Daemon:
     """
     A generic daemon class.
-    
+
     Usage: subclass the Daemon class and override the run() method
     """
     def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
@@ -21,37 +21,37 @@ class Daemon:
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
-    
+
     def daemonize(self):
         """
-        do the UNIX double-fork magic, see Stevens' "Advanced 
+        do the UNIX double-fork magic, see Stevens' "Advanced
         Programming in the UNIX Environment" for details (ISBN 0201563177)
         http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16
         """
-        try: 
-            pid = os.fork() 
+        try:
+            pid = os.fork()
             if pid > 0:
                 # exit first parent
-                sys.exit(0) 
-        except OSError, e: 
+                sys.exit(0)
+        except OSError, e:
             sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(1)
-    
+
         # decouple from parent environment
-        os.chdir("/") 
-        os.setsid() 
-        os.umask(0) 
-    
+        os.chdir("/")
+        os.setsid()
+        os.umask(0)
+
         # do second fork
-        try: 
-            pid = os.fork() 
+        try:
+            pid = os.fork()
             if pid > 0:
                 # exit from second parent
-                sys.exit(0) 
-        except OSError, e: 
+                sys.exit(0)
+        except OSError, e:
             sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
-            sys.exit(1) 
-    
+            sys.exit(1)
+
         # redirect standard file descriptors
         sys.stdout.flush()
         sys.stderr.flush()
@@ -61,12 +61,12 @@ class Daemon:
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
-    
+
         # write pidfile
         atexit.register(self.delpid)
         pid = str(os.getpid())
         file(self.pidfile,'w+').write("%s\n" % pid)
-    
+
     def delpid(self):
         os.remove(self.pidfile)
 
@@ -81,12 +81,12 @@ class Daemon:
             pf.close()
         except IOError:
             pid = None
-    
+
         if pid:
             message = "pidfile %s already exist. Daemon already running?\n"
             sys.stderr.write(message % self.pidfile)
             sys.exit(1)
-        
+
         # Start the daemon
         self.daemonize()
         self.run()
@@ -105,7 +105,7 @@ class Daemon:
             pf.close()
         except IOError:
             pid = None
-    
+
         if not pid:
             message = "pidfile %s does not exist. Daemon not running?\n"
             sys.stderr.write(message % self.pidfile)
@@ -117,7 +117,7 @@ class Daemon:
         """
         Stop the daemon
         """
-        # Try killing the daemon process    
+        # Try killing the daemon process
         pid = self.pid()
         if not pid: return
 
@@ -191,7 +191,7 @@ def blink_leds():
         GPIO.setmode(GPIO.BCM)
         # set up GPIO output channel
         GPIO.setup(16, GPIO.OUT)
-        
+
         while t.is_set():
             GPIO.output(16, GPIO.LOW)
             time.sleep(0.4)
@@ -203,12 +203,12 @@ def blink_leds():
     t = threading.Thread(target=_f, args=(o,))
     t.start()
     return t, o
-      
+
 def stop_blinking(v):
     """
       stop blinking the leds
     """
-    t, o = v 
+    t, o = v
     o.clear()
     t.join()
 
