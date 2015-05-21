@@ -13,11 +13,24 @@ def get_acct():
         raise Exception("Server not valid!")
     acct = cloudant.Account(_server)
     if acct.login(str(getmacid()), str(getpassword())).status_code != 200:
-        raise Exception("Server (%s) credentials invalid!" % _server)
+        raise Exception("Server ({}) credentials invalid!".format(_server))
     return acct
 
 def get_database():
     return get_acct()[_database_name]
+
+def send_heartbeat(db=None, **kwargs):
+    """
+      Update the update document
+    """
+    if db is None:
+        db = get_database()
+    hdoc = { "type" : "heartbeat" }
+    hdoc.update(kwargs)
+    db.design("nedm_default").put(
+      "_update/insert_with_timestamp/{}_heartbeat".format(str(getmacid())),
+      params=hdoc)
+
 
 def get_processes_code():
     db = get_database()

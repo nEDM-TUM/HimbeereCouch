@@ -4,6 +4,7 @@ import traceback
 import threading
 import multiprocessing
 from logging import StreamHandler as SH
+import atexit
 
 _current_log = []
 _current_log_lock = threading.Lock()
@@ -40,24 +41,29 @@ class MPLogHandler(logging.Handler):
 
         self._handler = SH()
         self.queue = multiprocessing.Queue(-1)
+        self._shutdown = False
 
         thrd = threading.Thread(target=self.receive)
         thrd.daemon = True
         thrd.start()
+        atexit.register(logging.shutdown)
+        self._thrd = thrd
 
     def setFormatter(self, fmt):
         logging.Handler.setFormatter(self, fmt)
         self._handler.setFormatter(fmt)
 
     def receive(self):
-        while True:
+        while not self._shutdown:
             try:
-                record = self.queue.get()
+                record = self.queue.get(False, 0.2)
                 self._handler.emit(record)
 
                 _current_log_lock.acquire()
                 _current_log.append(record)
                 _current_log_lock.release()
+            except multiprocessing.Queue.Empty:
+                pass
             except (KeyboardInterrupt, SystemExit):
                 raise
             except (EOFError,TypeError):
@@ -89,8 +95,9 @@ class MPLogHandler(logging.Handler):
 
     def close(self):
         self._handler.close()
+        self._shutdown = True
+        self._thrd.join()
         logging.Handler.close(self)
-
 
 _logger = logging.getLogger("RSPBY")
 _logger.setLevel(logging.INFO)

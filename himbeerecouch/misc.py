@@ -2,9 +2,19 @@ import socket
 import signal
 import json
 from .util import getmacid, getpassword, blink_leds, stop_blinking
+from .log import log
 
 _broadcast_port = 53000
 _max_broadcast_packet = 65000
+
+def execute_cmd(dic):
+    import subprocess as _sp
+    try:
+        p = _sp.Popen(dic["cmd"], stderr=_sp.PIPE, stdout=_sp.PIPE)
+        dic["ret"] = list(p.communicate())
+    except Exception as e:
+        dic["ret"] = [None,repr(e)]
+
 
 def broadcast_message(server_name="", send_data=None, timeout=10):
     """
