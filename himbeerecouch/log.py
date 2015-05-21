@@ -5,6 +5,8 @@ import threading
 import multiprocessing
 from logging import StreamHandler as SH
 import atexit
+import Queue
+from .util import getmacid
 
 _current_log = []
 _current_log_lock = threading.Lock()
@@ -56,13 +58,13 @@ class MPLogHandler(logging.Handler):
     def receive(self):
         while not self._shutdown:
             try:
-                record = self.queue.get(False, 0.2)
+                record = self.queue.get(True, 0.3)
                 self._handler.emit(record)
 
                 _current_log_lock.acquire()
-                _current_log.append(record)
+                _current_log.append(self.format(record))
                 _current_log_lock.release()
-            except multiprocessing.Queue.Empty:
+            except (Queue.Empty,IOError):
                 pass
             except (KeyboardInterrupt, SystemExit):
                 raise
@@ -99,9 +101,9 @@ class MPLogHandler(logging.Handler):
         self._thrd.join()
         logging.Handler.close(self)
 
-_logger = logging.getLogger("RSPBY")
+_logger = logging.getLogger()
 _logger.setLevel(logging.INFO)
-_formatter = logging.Formatter("%(asctime)s [%(name)s/%(processName)s] %(levelname)s %(message)s")
+_formatter = logging.Formatter("%(asctime)s [RSPBY/%(processName)s] %(levelname)s %(message)s")
 _handler = MPLogHandler()
 _handler.setFormatter(_formatter)
 _logger.addHandler(_handler)

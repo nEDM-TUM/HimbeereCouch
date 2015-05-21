@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 import signal
 import threading as _th
-import multiprocessing as _mp
 import time
 import os
 from .util import Daemon, getmacid, getpassword
 from .log import MPLogHandler, flush_log_to_db, log
-from .database import set_server, get_database, get_processes_code
+from .database import set_server, get_database, get_processes_code, send_heartbeat
 from .rpc import RaspServerProcess, start_new_process
 from .misc import execute_cmd, receive_broadcast_message
+import Queue
+import logging
 
 
 class ShouldExit(Exception):
@@ -76,7 +77,7 @@ def listen_daemon(ids, daemon):
                 if l is None:
                     # Take care of housekeeping on the heartbeats
                     flush_log_to_db(adb)
-                    send_heartbeat(db=adb,running_ids=ids.running_ids)
+                    send_heartbeat(db=adb,running_ids=list(ids.running_ids))
                     continue
                 # Force reload
                 if "deleted" in l:
@@ -96,8 +97,8 @@ def listen_daemon(ids, daemon):
             return
         except ShouldExit:
             return
-        except Exception as e:
-            log("Exception seen: " + repr(e))
+        except Exception:
+            logging.exception("Error in changes feed thread")
             if daemon.should_quit(): return
             time.sleep(5)
 
@@ -117,9 +118,9 @@ class RaspberryDaemon(Daemon):
 
         code_list = get_processes_code()
         processes = {}
-        for anid, code in code_list.items():
-            processes[anid] = start_new_process(anid, code)
-        ids.ids = code_list.keys()
+        for aname, o in code_list.items():
+            processes[o["id"]] = start_new_process(aname, o["code"])
+        ids.ids = processes.keys()
 
         serv.accept_connection(len(processes))
 
@@ -129,12 +130,12 @@ class RaspberryDaemon(Daemon):
             for anid,x in processes.items():
                 t,q = x
                 try:
-                    res = q.get(False,0.2)
+                    res = q.get(True,0.2)
                     t.join()
                     if "ok" not in res:
-                        log("Error seen ({}) : {}".format(k, res["error"]))
+                        log("Error seen ({}) : {}".format(anid, res["error"]))
                     del_list.append(anid)
-                except _mp.Queue.Empty:
+                except (Queue.Empty,IOError):
                     pass
                 if self.should_quit() and not exit_req:
                     serv.exit()
@@ -182,9 +183,9 @@ class RaspberryDaemon(Daemon):
 
             log("Starting, with server: %s" % server)
             try:
-                self.run_as_daemon(lock_obj)
-            except Exception as e:
-                log("Received exception: " + repr(e))
+                self.run_as_daemon(ids)
+            except Exception:
+                logging.exception("Error run daemon")
 
             while not self.should_quit():
                 time.sleep(1.0)

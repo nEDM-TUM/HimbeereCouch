@@ -44,16 +44,14 @@ def get_processes_code():
     global_modules = {}
     for r in res['rows']:
        d = r['doc']
-       code = {}
-       if 'modules' in d:
-           code.update(d['modules'])
-       if 'global_modules' in d:
-           global_modules.update(d['global_modules'])
+       code = d.get('modules', {})
+       global_modules.update(d.get('global_modules', {}))
        if 'code' in d:
            code['main'] = d['code']
        if "main" in code:
            # Only add main code to return document
-           ret_dic[r["id"]] = code
+           anid = d.get("name", r["id"])
+           ret_dic[anid] = { "id" : r["id"], "code" : code }
 
     for v in ret_dic.values():
        v.update(global_modules)

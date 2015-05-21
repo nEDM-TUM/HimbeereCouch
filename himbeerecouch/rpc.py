@@ -130,9 +130,9 @@ def start_new_process(name, code):
             {
             "log" : log,
             "get_acct" : get_acct,
-            "should_exit" : o.should_exit,
-            "register_exit_notification" : o.register_exit_notification,
-            "remove_exit_notification" :  o.remove_exit_notification
+            "should_quit" : o.should_exit,
+            "register_quit_notification" : o.register_exit_notification,
+            "remove_quit_notification" :  o.remove_exit_notification
             }
           )
         ]
