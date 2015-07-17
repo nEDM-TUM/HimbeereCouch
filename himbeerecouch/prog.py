@@ -206,7 +206,6 @@ def run_daemon(cmd, sf, apath):
     join = os.path.join
     daemon = RaspberryDaemon(join(apath, 'rspby_daemon.pid'),
                              stdout=join(apath, 'rspby_daemon.log'),
-                             stderr=join(apath, 'rspby_daemon.err'),
                              server_file=sf)
     if 'start' == cmd:
         daemon.start()
