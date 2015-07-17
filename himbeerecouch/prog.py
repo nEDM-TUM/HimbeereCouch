@@ -52,7 +52,6 @@ class IDCache(object):
         self._running_ids = set(ids)
         self._lock.release()
 
-
     def __contains__(self, anid):
         self._lock.acquire()
         isin = anid in self._ids
@@ -217,5 +216,4 @@ def run_daemon(cmd, sf, apath):
         daemon.reload()
     else:
         print "usage: start|stop|restart|reload"
-
 

@@ -4,9 +4,9 @@ from threading import Thread
 from .log import log
 from .database import get_acct
 import traceback
-
 import string
 import random
+
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
    return ''.join(random.choice(chars) for _ in range(size))
 
@@ -149,6 +149,4 @@ def start_new_process(name, code):
     t.daemon = True
     t.start()
     return t, q
-
-
 
