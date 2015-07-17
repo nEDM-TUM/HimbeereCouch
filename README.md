@@ -66,7 +66,9 @@ The Daemon expects documents that look like:
     }
 ```
 
-It attempts to load the code as a module, and runs the ```main``` function in the module.  The daemon will react whenever a new document is loaded/updated.  The code should look like:
+It attempts to load the code as a module, and runs the ```main``` function in
+the module.  The daemon will react whenever a new document is loaded/updated.
+The code should look like:
 
  ```python
  def main():
