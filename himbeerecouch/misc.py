@@ -36,7 +36,7 @@ def broadcast_message(server_name="", send_data=None, timeout=10):
         send_data = json.dumps(send_data)
 
     if len(send_data) > _max_broadcast_packet:
-        raise Exception("Length of sent data (%i) exceeds max (%i)" % (len(send_data), _max_broadcast_packet))
+        raise Exception("Length of sent data ({}) exceeds max ({})".format(len(send_data), _max_broadcast_packet))
 
     s.sendto(send_data, ('<broadcast>', _broadcast_port))
 

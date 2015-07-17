@@ -182,7 +182,7 @@ class RaspberryDaemon(Daemon):
             t = _th.Thread(target=listen_daemon, args=(ids,self))
             t.start()
 
-            log("Starting, with server: %s" % server)
+            log("Starting, with server: {}".format(server))
             try:
                 self.run_as_daemon(ids)
             except Exception:
