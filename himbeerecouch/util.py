@@ -1,12 +1,17 @@
-import hashlib, uuid
+import hashlib
 import threading
 import time
 
-def getmacid():
+def getmacid(interface=None):
     """
       Get MAC id
     """
-    return uuid.getnode()
+    if interface is None:
+        interface = "eth0"
+    return int(
+        open('/sys/class/net/{}/address'.format(interface)).read()
+        .rstrip()
+        .replace(':',''), 16)
 
 def getserial():
     """
