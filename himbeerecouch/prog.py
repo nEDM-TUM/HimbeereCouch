@@ -131,10 +131,13 @@ class RaspberryDaemon(Daemon):
             for anid,x in processes.items():
                 t,q = x
                 try:
+                    log("Checking output")
                     res = q.get(True,0.2)
+                    log("Got output")
                     t.join()
                     if "ok" not in res:
                         log("Error seen ({}) : {}".format(anid, res["error"]))
+                    log("Will remove process")
                     del_list.append(anid)
                 except (Queue.Empty,IOError):
                     pass
