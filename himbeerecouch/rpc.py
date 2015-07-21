@@ -139,9 +139,12 @@ def start_new_process(name, code):
         o.listen()
         try:
             import main
+            log("Running main")
             main.main()
+            log("Finished main")
             q.put({"ok" : True})
         except:
+            log("Error seen {}".format(traceback.format_exc()))
             q.put({"error" : traceback.format_exc()})
 
     q = _mp.Queue()
