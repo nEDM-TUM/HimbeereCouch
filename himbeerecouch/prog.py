@@ -125,6 +125,7 @@ class RaspberryDaemon(Daemon):
         serv.accept_connection(len(processes))
 
         exit_req = False
+        exit_time = None
         while len(processes) > 0:
             del_list = []
             for anid,x in processes.items():
@@ -140,8 +141,14 @@ class RaspberryDaemon(Daemon):
                 if self.should_quit() and not exit_req:
                     serv.exit()
                     exit_req = True
+                    exit_time = time.time()
+
             for t in del_list: del processes[t]
             ids.running_ids = processes.keys()
+            if exit_req and time.time() - exit_time > 10:
+                log("Time out waiting for processes, force terminate")
+                for t in processes:
+                    t.terminate()
 
     def run(self):
 
