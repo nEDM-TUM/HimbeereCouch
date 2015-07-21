@@ -13,6 +13,8 @@ import Queue
 import logging
 
 
+_handled_signals = [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]
+
 class ShouldExit(Exception):
     pass
 
@@ -118,8 +120,20 @@ class RaspberryDaemon(Daemon):
 
         code_list = get_processes_code()
         processes = {}
+
+        # Ignore handlers when starting new processes
+        sig_hdlrs = {}
+        for s in _handled_signals:
+            sig_hdlrs[s] = signal.getsignal(s)
+            signal.signal(s, signal.SIG_IGN)
+
         for aname, o in code_list.items():
             processes[o["id"]] = start_new_process(aname, o["code"])
+
+        # Reset handlers
+        for s in sig_hdlrs:
+            signal.signal(s, sig_hdlrs[s])
+
         ids.ids = processes.keys()
 
         serv.accept_connection(len(processes))
@@ -179,7 +193,7 @@ class RaspberryDaemon(Daemon):
         server = open(self.server_file).read()
         set_server(server)
 
-        for s in [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]:
+        for s in _handled_signals:
             signal.signal(s, _handler)
 
         while True:
