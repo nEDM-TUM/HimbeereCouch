@@ -11,6 +11,7 @@ from .rpc import RaspServerProcess, start_new_process
 from .misc import execute_cmd, receive_broadcast_message
 import Queue
 import logging
+import traceback
 
 
 class ShouldExit(Exception):
@@ -132,7 +133,7 @@ class RaspberryDaemon(Daemon):
                 t,q = x
                 try:
                     log("Checking output")
-                    res = q.get(True,0.2)
+                    res = q.get(False)
                     log("Got output")
                     t.join()
                     if "ok" not in res:
@@ -141,6 +142,8 @@ class RaspberryDaemon(Daemon):
                     del_list.append(anid)
                 except (Queue.Empty,IOError):
                     pass
+                except:
+                    log("Unexpected error ({})".format(traceback.format_exc()))
                 if self.should_quit() and not exit_req:
                     serv.exit()
                     exit_req = True
@@ -152,6 +155,8 @@ class RaspberryDaemon(Daemon):
                 log("Time out waiting for processes, force terminate")
                 for t in processes:
                     t.terminate()
+            else:
+                time.sleep(0.5)
 
     def run(self):
 
