@@ -20,7 +20,9 @@ Separate Rasp Pis are differentiated by their MAC addresses.
 ##Basic instructions:
 (Note, one can do this once on a single Raspberry Pi, and
 copy the SD card for future Raspberry Pi.  If this is done, then you only need
-to start from step #3.)
+to start from step #3.)  For the nEDM experiment, we use an NFS boot so that
+the Rasp-Pis always have the same OS/software.  For more information about
+this, see [nEDM](nEDM).
 
 1.  Download/install the daemon at `init_scripts/rspby`:
   1. e.g. in ```/etc/init.d```
