@@ -13,6 +13,16 @@ def getmacid(interface=None):
         .rstrip()
         .replace(':',''), 16)
 
+def getipaddr(interface=None):
+    """
+      Get ip address
+    """
+    import netifaces as ni
+    if interface is None:
+        interface = "eth0"
+    return ni.ifaddresses(interface)[ni.AF_INET][0]['addr']
+
+
 def getserial():
     """
       Return serial number of RaspPi
