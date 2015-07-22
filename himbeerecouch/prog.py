@@ -4,7 +4,7 @@ import threading as _th
 import time
 import os
 from .daemon import Daemon
-from .util import getmacid, getpassword
+from .util import getmacid, getpassword, getipaddr
 from .log import MPLogHandler, flush_log_to_db, log
 from .database import set_server, get_database, get_processes_code, send_heartbeat
 from .rpc import RaspServerProcess, start_new_process
@@ -74,12 +74,13 @@ def listen_daemon(ids, daemon):
                                          type=[mi, mi+"_cmd"],
                                          handle_deleted=True),
                                          emit_heartbeats=True)
+            ip_addr = getipaddr()
             for l in ch:
                 if l is None and daemon.should_quit(): raise ShouldExit()
                 if l is None:
                     # Take care of housekeeping on the heartbeats
                     flush_log_to_db(adb)
-                    send_heartbeat(db=adb,running_ids=list(ids.running_ids))
+                    send_heartbeat(db=adb,running_ids=list(ids.running_ids), ip=ip_addr)
                     continue
                 # Force reload
                 if "deleted" in l:
