@@ -160,7 +160,7 @@ class RaspberryDaemon(Daemon):
 
             for t in del_list: del processes[t]
             ids.running_ids = processes.keys()
-            if exit_req and time.time() - exit_time > 10:
+            if exit_req and time.time() - exit_time > 20:
                 log("Time out waiting for processes, force terminate")
                 for t in processes:
                     processes[t][0].terminate()
