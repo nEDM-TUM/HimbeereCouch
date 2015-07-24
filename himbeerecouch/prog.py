@@ -163,7 +163,7 @@ class RaspberryDaemon(Daemon):
             if exit_req and time.time() - exit_time > 10:
                 log("Time out waiting for processes, force terminate")
                 for t in processes:
-                    t.terminate()
+                    processes[t][0].terminate()
 
     def run(self):
 
