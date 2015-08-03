@@ -112,6 +112,10 @@ _formatter = logging.Formatter("%(asctime)s [RSPBY/%(processName)s] %(levelname)
 _handler = None
 log = _logger.info
 
+# Suppress unnecessary output from requests
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.WARN)
+
 def set_logging_file(out_file=None):
     global _handler
     if _handler is not None:
