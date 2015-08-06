@@ -163,7 +163,9 @@ class RaspberryDaemon(Daemon):
             if exit_req and time.time() - exit_time > 20:
                 log("Time out waiting for processes, force terminate")
                 for t in processes:
-                    processes[t][0].terminate()
+                    os.kill(processes[t][0].pid, signal.SIGKILL)
+                log("Restart now recommended")
+                time.sleep(2)
 
     def run(self):
 
