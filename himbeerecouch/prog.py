@@ -165,6 +165,7 @@ class RaspberryDaemon(Daemon):
                 for t in processes:
                     os.kill(processes[t][0].pid, signal.SIGKILL)
                 log("Restart now recommended")
+                processes = []
                 time.sleep(2)
 
     def run(self):
