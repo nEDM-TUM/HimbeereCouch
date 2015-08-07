@@ -95,8 +95,7 @@ class Daemon:
         except ForceRestart:
             # Forcing a restart if it was requested
             self.delpid()
-            python = sys.executable
-            os.execl(python, python, *sys.argv)
+            os.execl("/etc/init.d/rspby", "/etc/init.d/rspby", "start")
 
 
     def reload(self, use_this_pid = False):
