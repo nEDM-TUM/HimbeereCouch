@@ -3,7 +3,7 @@ import signal
 import threading as _th
 import time
 import os
-from .daemon import Daemon
+from .daemon import Daemon, ForceRestart
 from .util import getmacid, getpassword, getipaddr
 from .log import MPLogHandler, flush_log_to_db, log
 from .database import set_server, get_database, get_processes_code, send_heartbeat
@@ -100,7 +100,7 @@ def listen_daemon(ids, daemon):
             return
         except ShouldExit:
             return
-        except Exception:
+        except:
             logging.exception("Error in changes feed thread")
             if daemon.should_quit(): return
             time.sleep(5)
@@ -164,9 +164,8 @@ class RaspberryDaemon(Daemon):
                 log("Time out waiting for processes, force terminate")
                 for t in processes:
                     os.kill(processes[t][0].pid, signal.SIGKILL)
-                log("Restart now recommended")
-                processes = {}
-                time.sleep(2)
+                log("Restart will be forced if not quitting")
+                raise ForceRestart()
 
     def run(self):
 
@@ -209,7 +208,10 @@ class RaspberryDaemon(Daemon):
             log("Starting, with server: {}".format(server))
             try:
                 self.run_as_daemon(ids)
-            except Exception:
+            except ForceRestart:
+                # Force a brutal restart, one of the scripts misbehaved
+                if self._is_reloading: raise
+            except:
                 logging.exception("Error run daemon")
 
             while not self.should_quit():
