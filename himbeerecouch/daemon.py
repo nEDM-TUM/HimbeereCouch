@@ -6,6 +6,10 @@ from .log import set_logging_file
   From: http://www.jejik.com/articles/2007/02/a_simple_unix_linux_daemon_in_python/
   Author: Sander Marechal
 """
+
+class ForceRestart(Exception):
+    pass
+
 class Daemon:
     """
     A generic daemon class.
@@ -86,7 +90,13 @@ class Daemon:
 
         # Start the daemon
         self.daemonize()
-        self.run()
+        try:
+            self.run()
+        except ForceRestart:
+            # Forcing a restart if it was requested
+            self.delpid()
+            python = sys.executable
+            os.execl(python, python, *sys.argv)
 
 
     def reload(self, use_this_pid = False):
