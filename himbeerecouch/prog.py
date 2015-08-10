@@ -244,3 +244,10 @@ def run_daemon(cmd, sf, apath):
     else:
         print "usage: start|stop|restart|reload"
 
+def run(sf, apath):
+    join = os.path.join
+    daemon = RaspberryDaemon(join(apath, 'rspby_daemon.pid'),
+                             stdout=join(apath, 'rspby_daemon.log'),
+                             server_file=sf)
+
+    daemon.run()
