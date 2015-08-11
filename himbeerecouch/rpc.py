@@ -20,20 +20,29 @@ _authkey = id_generator(64)
 
 class RPCObject(object):
     def __init__(self):
-        def _output_handler(sn, fr):
-            logging.info(
+        def _output_handler(sig, fn):
+            self.output_handler(sig, fn)
+        signal.signal(signal.SIGUSR1, _output_handler)
+
+    def output_handler(self, sn, fr):
+        logging.info(
 """Dumping current stack information:
 
    {}
 
-Complete""".format('\n   '.join(stack_trace(_output_handler))))
-        signal.signal(signal.SIGUSR1, _output_handler) 
+Complete""".format('\n   '.join(stack_trace(self.output_handler))))
+
 
 class RPCServer(RPCObject):
     def __init__(self, address, authkey):
         super(RPCServer, self).__init__()
         self._clients = {}
         self._server_c = Listener(address, authkey=authkey)
+
+    def output_handler(self, sn, fr):
+        super(RPCServer, self).output_handler(sn, fr)
+        for c in self._clients:
+            os.kill(self._clients[c]["pid"], signal.SIGUSR1)
 
     def accept_connection(self, connections):
         for x in range(connections):
