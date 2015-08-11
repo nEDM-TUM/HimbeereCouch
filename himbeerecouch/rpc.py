@@ -42,7 +42,9 @@ class RPCServer(RPCObject):
     def output_handler(self, sn, fr):
         super(RPCServer, self).output_handler(sn, fr)
         for c in self._clients:
-            os.kill(self._clients[c]["pid"], signal.SIGUSR1)
+            try:
+                os.kill(self._clients[c]["pid"], signal.SIGUSR1)
+            except: pass
 
     def accept_connection(self, connections):
         for x in range(connections):
@@ -76,6 +78,9 @@ class RPCProxy(RPCObject):
         self._conn.send(json.dumps({"name" : _mp.current_process().name, "pid" : os.getpid()}))
         self._should_exit = False
         self.register_function(self.exit_now, "exit")
+        def _exit(*args):
+            self.exit_now()
+        signal.signal(signal.SIGINT, _exit)
 
     def listen(self):
         def handle_client(client_c):
