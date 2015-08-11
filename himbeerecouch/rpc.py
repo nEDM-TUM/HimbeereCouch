@@ -10,6 +10,7 @@ import random
 import logging
 import os
 import signal
+import json
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
    return ''.join(random.choice(chars) for _ in range(size))
@@ -37,14 +38,14 @@ class RPCServer(RPCObject):
     def accept_connection(self, connections):
         for x in range(connections):
            client_c = self._server_c.accept()
-           client_name = client_c.recv()
+           client_name = json.loads(client_c.recv())
            self._clients[client_c] = client_name
 
     def __getattr__(self, name):
         def do_rpc(*args, **kwargs):
             results = {}
             for c in self._clients:
-                client_name = self._clients[c]
+                client_name = self._clients[c]["name"]
                 try:
                     c.send((name, args, kwargs))
                     results[client_name] = c.recv()
@@ -63,7 +64,7 @@ class RPCProxy(RPCObject):
         self._functions = { }
         self._quitnotifiers = set()
         self._conn = Client(address, authkey=authkey)
-        self._conn.send(_mp.current_process().name)
+        self._conn.send(json.dumps({"name" : _mp.current_process().name, "pid" : os.getpid()}))
         self._should_exit = False
         self.register_function(self.exit_now, "exit")
 
