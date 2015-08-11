@@ -81,6 +81,7 @@ class RPCProxy(RPCObject):
         def _exit(*args):
             self.exit_now()
         signal.signal(signal.SIGINT, _exit)
+        signal.signal(signal.SIGTERM, _exit)
 
     def listen(self):
         def handle_client(client_c):
