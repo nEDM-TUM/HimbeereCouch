@@ -3,9 +3,13 @@ import multiprocessing as _mp
 from threading import Thread
 from .log import log
 from .database import get_acct
+from .util import stack_trace
 import traceback
 import string
 import random
+import logging
+import os
+import signal
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
    return ''.join(random.choice(chars) for _ in range(size))
@@ -13,8 +17,20 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 _server = ('', 17000)
 _authkey = id_generator(64)
 
-class RPCServer(object):
+class RPCObject(object):
+    def __init__(self):
+        def _output_handler(sn, fr):
+            logging.info(
+"""Dumping current stack information:
+
+   {}
+
+Complete""".format('\n   '.join(stack_trace(_output_handler))))
+        signal.signal(signal.SIGUSR1, _output_handler) 
+
+class RPCServer(RPCObject):
     def __init__(self, address, authkey):
+        super(RPCServer, self).__init__()
         self._clients = {}
         self._server_c = Listener(address, authkey=authkey)
 
@@ -41,8 +57,9 @@ class RPCServer(object):
         return do_rpc
 
 
-class RPCProxy(object):
+class RPCProxy(RPCObject):
     def __init__(self, address, authkey):
+        super(RPCProxy, self).__init__()
         self._functions = { }
         self._quitnotifiers = set()
         self._conn = Client(address, authkey=authkey)
