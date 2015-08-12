@@ -3,6 +3,7 @@ import logging
 import traceback
 import threading
 import multiprocessing
+from multiprocessing.util import register_after_fork
 import atexit
 import Queue
 from .util import getmacid
@@ -51,6 +52,13 @@ class MPLogHandler(logging.Handler):
         atexit.register(logging.shutdown)
         self._thrd = None
         self.start_recv_thread()
+        self._is_child = False
+
+        # Children will automatically register themselves as chilcren
+        register_after_fork(self, MPLogHandler.set_is_child)
+
+    def set_is_child(self):
+        self._is_child = True
 
     def start_recv_thread(self):
         if self._thrd: return
@@ -104,7 +112,9 @@ class MPLogHandler(logging.Handler):
     def emit(self, record):
         try:
             s = self._format_record(record)
-            self.send(s)
+            # If we are a child, then send the record, otherwise simply emit it
+            if self._is_child: self.send(s)
+            else: self._handler.emit(s)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
