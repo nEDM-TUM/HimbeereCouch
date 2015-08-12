@@ -177,21 +177,8 @@ class RaspberryDaemon(Daemon):
                 log("Quit requested")
             self._should_quit = True
 
-        def _listen_for_new_server(o, to):
-            asrv = receive_broadcast_message(to, self.should_quit)
-            if not asrv:
-                return False
-            open(o.server_file, "w").write(asrv)
-            self.reload(True)
-            return True
-
-        check_server = None
         if not os.path.exists(self.server_file):
-            if not _listen_for_new_server(self, 120):
-                return
-        else:
-            check_server = _th.Thread(target=_listen_for_new_server, args=(self, 0))
-            check_server.start()
+            raise IOError("Server file not found")
 
         server = open(self.server_file).read()
         set_server(server)
@@ -225,8 +212,6 @@ class RaspberryDaemon(Daemon):
 
             if self.should_quit(): break
 
-        # If we ran the check server thread, join it
-        if check_server: check_server.join()
 
 def run_daemon(cmd, sf, apath):
     join = os.path.join
