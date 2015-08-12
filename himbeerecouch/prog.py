@@ -6,7 +6,6 @@ import os
 from .daemon import Daemon, ForceRestart
 from .util import getmacid, getpassword, getipaddr
 from .log import (MPLogHandler,
-                  flush_log_to_db,
                   log,
                   start_child_logging,
                   stop_child_logging)
@@ -83,7 +82,6 @@ def listen_daemon(ids, daemon):
                 if l is None and daemon.should_quit(): raise ShouldExit()
                 if l is None:
                     # Take care of housekeeping on the heartbeats
-                    flush_log_to_db(adb)
                     send_heartbeat(db=adb,running_ids=list(ids.running_ids), ip=ip_addr)
                     continue
                 # Force reload

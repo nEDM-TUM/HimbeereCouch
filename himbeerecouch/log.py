@@ -10,26 +10,6 @@ from .util import getmacid
 from logging import FileHandler as FH
 from logging import StreamHandler as SH
 
-_current_log = []
-_current_log_lock = threading.Lock()
-
-def flush_log_to_db(db):
-    """
-      Flush the log to the database
-    """
-    global _current_log
-    # Grab the current log
-    _current_log_lock.acquire()
-    thelog = _current_log
-    _current_log = []
-    _current_log_lock.release()
-
-    if len(thelog) == 0: return
-    db.design("raspberry_def").put(
-        "_update/update_log/%s_log?remove_since=50000" % str(getmacid()),
-        params=dict(log=thelog))
-
-
 # ============================================================================
 # Define Log Handler
 # ============================================================================
@@ -77,9 +57,6 @@ class MPLogHandler(logging.Handler):
                 record = self.queue.get(True, 0.3)
                 self._handler.emit(record)
 
-                _current_log_lock.acquire()
-                _current_log.append(self.format(record))
-                _current_log_lock.release()
             except (Queue.Empty,IOError):
                 pass
             except (KeyboardInterrupt, SystemExit):
