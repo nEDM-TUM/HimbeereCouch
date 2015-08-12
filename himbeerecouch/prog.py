@@ -105,6 +105,19 @@ def listen_daemon(ids, daemon):
             if daemon.should_quit(): return
             time.sleep(5)
 
+class ListenDaemon(object):
+    def __init__(self, ids, daemon):
+        self.ids = ids
+        self.daemon = daemon
+        self.t = None
+
+    def __enter__(self):
+        self.t = _th.Thread(target=listen_daemon, args=(self.ids,self.daemon))
+        self.t.start()
+
+    def __exit__(self, *args):
+        self.t.join()
+
 class RaspberryDaemon(Daemon):
     def __init__(self, pid_file, server_file="", **kwargs):
         Daemon.__init__(self, pid_file, **kwargs)
@@ -141,31 +154,33 @@ class RaspberryDaemon(Daemon):
 
         exit_req = False
         exit_time = None
-        while len(processes) > 0:
-            del_list = []
-            for anid,x in processes.items():
-                t,q = x
-                try:
-                    res = q.get(True,0.2)
-                    t.join()
-                    if "ok" not in res:
-                        log("Error seen ({}) : {}".format(anid, res["error"]))
-                    del_list.append(anid)
-                except (Queue.Empty,IOError):
-                    pass
-                if self.should_quit() and not exit_req:
-                    serv.exit()
-                    exit_req = True
-                    exit_time = time.time()
 
-            for t in del_list: del processes[t]
-            ids.running_ids = processes.keys()
-            if exit_req and time.time() - exit_time > 20:
-                log("Time out waiting for processes, force terminate")
-                for t in processes:
-                    os.kill(processes[t][0].pid, signal.SIGKILL)
-                log("Restart will be forced if not quitting")
-                raise ForceRestart()
+        with ListenDaemon(ids, self):
+            while len(processes) > 0:
+                del_list = []
+                for anid,x in processes.items():
+                    t,q = x
+                    try:
+                        res = q.get(True,0.2)
+                        t.join()
+                        if "ok" not in res:
+                            log("Error seen ({}) : {}".format(anid, res["error"]))
+                        del_list.append(anid)
+                    except (Queue.Empty,IOError):
+                        pass
+                    if self.should_quit() and not exit_req:
+                        serv.exit()
+                        exit_req = True
+                        exit_time = time.time()
+
+                for t in del_list: del processes[t]
+                ids.running_ids = processes.keys()
+                if exit_req and time.time() - exit_time > 20:
+                    log("Time out waiting for processes, force terminate")
+                    for t in processes:
+                        os.kill(processes[t][0].pid, signal.SIGKILL)
+                    log("Restart will be forced if not quitting")
+                    raise ForceRestart()
 
     def run(self):
 
@@ -189,8 +204,6 @@ class RaspberryDaemon(Daemon):
         while True:
             self._is_reloading, self._should_quit  = False, False
             ids = IDCache()
-            t = _th.Thread(target=listen_daemon, args=(ids,self))
-            t.start()
 
             log("Starting, with server: {}".format(server))
             try:
@@ -203,8 +216,6 @@ class RaspberryDaemon(Daemon):
 
             while not self.should_quit():
                 time.sleep(1.0)
-
-            t.join()
 
             if self._is_reloading:
                 log("Reloading...")
