@@ -139,6 +139,7 @@ class ProcessImporter(object):
             self._exported_commands = {}
         else:
             self._exported_commands = exported_commands
+        self._already_exported = []
 
     def find_module(self, fullname, path=None):
         if fullname in self._modules:
@@ -146,11 +147,16 @@ class ProcessImporter(object):
         return None
 
     def load_module(self, name):
+        import sys
+        if name in sys.modules and name not in self._already_exported:
+            return sys.modules[name]
         import imp
         mod = imp.new_module(name)
         exec self._modules[name] in mod.__dict__
         for cmd in self._exported_commands:
             mod.__dict__[cmd] = self._exported_commands[cmd]
+        sys.modules[name] = mod
+        self._already_exported.append(name)
         return mod
 
 
