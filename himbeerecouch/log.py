@@ -49,10 +49,15 @@ class MPLogHandler(logging.Handler):
         self.queue = multiprocessing.Queue(-1)
         self._shutdown = False
 
+        atexit.register(logging.shutdown)
+        self._thrd = None
+        self.start_recv_thread()
+
+    def start_recv_thread(self):
+        if self._thrd: continue
         thrd = threading.Thread(target=self.receive)
         thrd.daemon = True
         thrd.start()
-        atexit.register(logging.shutdown)
         self._thrd = thrd
 
     def setFormatter(self, fmt):
@@ -76,6 +81,12 @@ class MPLogHandler(logging.Handler):
                 break
             except:
                 traceback.print_exc(file=sys.stderr)
+
+    def shutdown_recv_thread(self):
+        if self._thrd:
+            self._shutdown = True
+            self._thrd.join()
+            self._thrd = None
 
     def send(self, s):
         self.queue.put_nowait(s)
@@ -101,8 +112,7 @@ class MPLogHandler(logging.Handler):
 
     def close(self):
         self._handler.close()
-        self._shutdown = True
-        self._thrd.join()
+        self.shutdown_recv_thread()
         logging.Handler.close(self)
 
 
@@ -125,3 +135,11 @@ def set_logging_file(out_file=None):
     _logger.addHandler(_handler)
 
 set_logging_file()
+
+def continue_logging():
+    if _handler:
+        _handler.start_recv_thread()
+
+def pause_logging():
+    if _handler:
+        _handler.shutdown_recv_thread()
