@@ -5,7 +5,11 @@ import time
 import os
 from .daemon import Daemon, ForceRestart
 from .util import getmacid, getpassword, getipaddr
-from .log import MPLogHandler, flush_log_to_db, log
+from .log import (MPLogHandler,
+                  flush_log_to_db,
+                  log,
+                  pause_logging,
+                  continue_logging)
 from .database import set_server, get_database, get_processes_code, send_heartbeat
 from .rpc import RaspServerProcess, start_new_process
 from .misc import execute_cmd, receive_broadcast_message
@@ -141,8 +145,14 @@ class RaspberryDaemon(Daemon):
             sig_hdlrs[s] = signal.getsignal(s)
             signal.signal(s, signal.SIG_IGN)
 
+        # Pause logging to remove currently running thread
+        pause_logging()
+
         for aname, o in code_list.items():
             processes[o["id"]] = start_new_process(aname, o["code"])
+
+        # Continue logging thread
+        continue_logging()
 
         # Reset handlers
         for s in sig_hdlrs:

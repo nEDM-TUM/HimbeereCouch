@@ -47,14 +47,14 @@ class MPLogHandler(logging.Handler):
         else:
             self._handler = SH()
         self.queue = multiprocessing.Queue(-1)
-        self._shutdown = False
 
         atexit.register(logging.shutdown)
         self._thrd = None
         self.start_recv_thread()
 
     def start_recv_thread(self):
-        if self._thrd: continue
+        if self._thrd: return
+        self._shutdown = False
         thrd = threading.Thread(target=self.receive)
         thrd.daemon = True
         thrd.start()
