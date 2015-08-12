@@ -8,8 +8,8 @@ from .util import getmacid, getpassword, getipaddr
 from .log import (MPLogHandler,
                   flush_log_to_db,
                   log,
-                  pause_logging,
-                  continue_logging)
+                  start_child_logging,
+                  stop_child_logging)
 from .database import set_server, get_database, get_processes_code, send_heartbeat
 from .rpc import RaspServerProcess, start_new_process
 from .misc import execute_cmd, receive_broadcast_message
@@ -114,6 +114,8 @@ class ListenDaemon(object):
         self.ids = ids
         self.daemon = daemon
         self.t = None
+        # start logging of children
+        start_child_logging()
 
     def __enter__(self):
         self.t = _th.Thread(target=listen_daemon, args=(self.ids,self.daemon))
@@ -121,6 +123,8 @@ class ListenDaemon(object):
 
     def __exit__(self, *args):
         self.t.join()
+        # stop logging of children
+        stop_child_logging()
 
 class RaspberryDaemon(Daemon):
     def __init__(self, pid_file, server_file="", **kwargs):
@@ -145,14 +149,9 @@ class RaspberryDaemon(Daemon):
             sig_hdlrs[s] = signal.getsignal(s)
             signal.signal(s, signal.SIG_IGN)
 
-        # Pause logging to remove currently running thread
-        pause_logging()
-
         for aname, o in code_list.items():
             processes[o["id"]] = start_new_process(aname, o["code"])
 
-        # Continue logging thread
-        continue_logging()
 
         # Reset handlers
         for s in sig_hdlrs:

@@ -51,7 +51,6 @@ class MPLogHandler(logging.Handler):
 
         atexit.register(logging.shutdown)
         self._thrd = None
-        self.start_recv_thread()
         self._is_child = False
 
         # Children will automatically register themselves as chilcren
@@ -146,10 +145,10 @@ def set_logging_file(out_file=None):
 
 set_logging_file()
 
-def continue_logging():
+def start_child_logging():
     if _handler:
         _handler.start_recv_thread()
 
-def pause_logging():
+def stop_child_logging():
     if _handler:
         _handler.shutdown_recv_thread()
