@@ -164,7 +164,7 @@ def start_new_process(name, code):
     def _new_proc(q):
         import sys
         o = RaspProxyProcess()
-        sys.meta_path = [
+        sys.meta_path.append(
           ProcessImporter(code,
             {
             "log" : log,
@@ -174,7 +174,7 @@ def start_new_process(name, code):
             "remove_quit_notification" :  o.remove_exit_notification
             }
           )
-        ]
+        )
         o.listen()
         try:
             import main
