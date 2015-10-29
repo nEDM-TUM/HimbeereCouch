@@ -1,0 +1,7 @@
+fierlingerwiki: https://fierlinger.wiki.tum.de/Administration+Page
+baseurl: /HimbeereCouch
+usertitle: himbeerecouch
+highlighter: pygments
+collections:
+  subsystems:
+    output: true
