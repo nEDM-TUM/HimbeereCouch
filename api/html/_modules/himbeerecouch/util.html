@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>himbeerecouch.util &mdash; himbeerecouch 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="himbeerecouch 0.2 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for himbeerecouch.util</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<div class="viewcode-block" id="getmacid"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getmacid">[docs]</a><span class="k">def</span> <span class="nf">getmacid</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Get MAC id</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">interface</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">interface</span> <span class="o">=</span> <span class="s">&quot;eth0&quot;</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/sys/class/net/{}/address&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">interface</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">),</span> <span class="mi">16</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="getipaddr"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getipaddr">[docs]</a><span class="k">def</span> <span class="nf">getipaddr</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Get ip address</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">netifaces</span> <span class="kn">as</span> <span class="nn">ni</span>
+    <span class="k">if</span> <span class="n">interface</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">interface</span> <span class="o">=</span> <span class="s">&quot;eth0&quot;</span>
+    <span class="k">return</span> <span class="n">ni</span><span class="o">.</span><span class="n">ifaddresses</span><span class="p">(</span><span class="n">interface</span><span class="p">)[</span><span class="n">ni</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;addr&#39;</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="getserial"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getserial">[docs]</a><span class="k">def</span> <span class="nf">getserial</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Return serial number of RaspPi</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Extract serial from cpuinfo file</span>
+    <span class="n">cpuserial</span> <span class="o">=</span> <span class="s">&quot;ERROR000000000&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/proc/cpuinfo&#39;</span><span class="p">,</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">==</span><span class="s">&#39;Serial&#39;</span><span class="p">:</span>
+          <span class="n">cpuserial</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">26</span><span class="p">]</span>
+          <span class="k">break</span>
+      <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">cpuserial</span>
+</div>
+<div class="viewcode-block" id="getpassword"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getpassword">[docs]</a><span class="k">def</span> <span class="nf">getpassword</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Get password, which is a combination of mac id and serial number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">getmacid</span><span class="p">())</span> <span class="o">+</span> <span class="n">getserial</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="blink_leds"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.blink_leds">[docs]</a><span class="k">def</span> <span class="nf">blink_leds</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Blink the leds on the RPi</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">RPi.GPIO</span> <span class="kn">as</span> <span class="nn">GPIO</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Only available ON Raspberry Pi&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_f</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+        <span class="n">GPIO</span><span class="o">.</span><span class="n">setwarnings</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">GPIO</span><span class="o">.</span><span class="n">setmode</span><span class="p">(</span><span class="n">GPIO</span><span class="o">.</span><span class="n">BCM</span><span class="p">)</span>
+        <span class="c"># set up GPIO output channel</span>
+        <span class="n">GPIO</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">GPIO</span><span class="o">.</span><span class="n">OUT</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="n">t</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+            <span class="n">GPIO</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">GPIO</span><span class="o">.</span><span class="n">LOW</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.4</span><span class="p">)</span>
+            <span class="n">GPIO</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">GPIO</span><span class="o">.</span><span class="n">HIGH</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.4</span><span class="p">)</span>
+
+    <span class="n">o</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">_f</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">o</span><span class="p">,))</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">o</span>
+</div>
+<div class="viewcode-block" id="stop_blinking"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.stop_blinking">[docs]</a><span class="k">def</span> <span class="nf">stop_blinking</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      stop blinking the leds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">o</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="stack_trace"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.stack_trace">[docs]</a><span class="k">def</span> <span class="nf">stack_trace</span><span class="p">(</span><span class="n">ignore_from</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return stack trace as list of strings, ignoring beginning at the</span>
+<span class="sd">    function given (ignore_from).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">ignore_from</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ignore_from</span> <span class="o">=</span> <span class="n">stack_trace</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ignore_from</span> <span class="o">=</span> <span class="n">ignore_from</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">ignore_from</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ignore_from</span><span class="p">)</span>
+
+    <span class="n">all_items</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_current_frames</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;# Total threads: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_items</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">threadId</span><span class="p">,</span> <span class="n">stack</span> <span class="ow">in</span> <span class="n">all_items</span><span class="p">:</span>
+        <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;# ThreadID: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">threadId</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">(</span><span class="n">stack</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">ignore_from</span><span class="p">:</span> <span class="k">break</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;   File: &quot;{}&quot;, line {}, in {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
+                                                        <span class="n">lineno</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;     {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+
+    <span class="k">return</span> <span class="n">code</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="http://nedm-tum.github.io/HimbeereCouch/">Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../daemon.html">himbeerecouch.daemon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">himbeerecouch.database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../util.html">himbeerecouch.util</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../log.html">himbeerecouch.log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rpc.html">himbeerecouch.rpc</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Michael Marino.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
