@@ -44,60 +44,99 @@
 <span class="target" id="module-himbeerecouch.database"></span><dl class="function">
 <dt id="himbeerecouch.database.get_acct">
 <code class="descclassname">himbeerecouch.database.</code><code class="descname">get_acct</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/database.html#get_acct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.database.get_acct" title="Permalink to this definition">¶</a></dt>
-<dd><p>get the account object, type: cloudant.Account</p>
+<dd><p>get the account object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">cloudant.Account</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="himbeerecouch.database.get_database">
 <code class="descclassname">himbeerecouch.database.</code><code class="descname">get_database</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/database.html#get_database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.database.get_database" title="Permalink to this definition">¶</a></dt>
-<dd><p>get the database object, type: cloudant.Database</p>
+<dd><p>get the database object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">cloudant.Database</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="himbeerecouch.database.get_processes_code">
 <code class="descclassname">himbeerecouch.database.</code><code class="descname">get_processes_code</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/database.html#get_processes_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.database.get_processes_code" title="Permalink to this definition">¶</a></dt>
-<dd><p>get the process code from the database
-This expects documents that look like:</p>
-<dl class="docutils">
-<dt>{</dt>
-<dd><p class="first">&#8220;type&#8221; : &#8220;macid_of_rasperry&lt;int&gt;&#8221;, # i.e. value returned by getmacid()
-&#8220;name&#8221; : &#8220;name of the code&#8221;,
-&#8220;modules&#8221; : { # these are modules used by this local code</p>
-<blockquote>
-<div>&#8220;name_of_module1&#8221; : &#8220;&lt;python code&gt;&#8221;,
-&#8220;name_of_module2&#8221; : &#8220;&lt;python code&gt;&#8221;,
-...</div></blockquote>
-<p>},
-&#8220;global_modules&#8221; : { # these modules will be exported to <em>all</em></p>
-<blockquote>
-<div><blockquote>
-<div># code in this database</div></blockquote>
-<p>&#8220;name_of_global1&#8221; : &#8220;&lt;python code&gt;&#8221;,
-&#8220;name_of_global2&#8221; : &#8220;&lt;python code&gt;&#8221;</p>
-</div></blockquote>
-<p>},
-&#8220;code&#8221; : &#8220;&lt;python code&gt;&#8221; # This is the main module, it <em>must</em> include a</p>
-<blockquote class="last">
-<div># <cite>main</cite> function</div></blockquote>
-</dd>
-</dl>
-<p>}</p>
-<p><em>Note</em>, all of these are optional.  If e.g. &#8220;code&#8221; is omitted, then only
-&#8220;global_modules&#8221; will essentially have any effect as they will be exported
+<dd><p>get the process code from the database (returned by <a class="reference internal" href="#himbeerecouch.database.get_database" title="himbeerecouch.database.get_database"><code class="xref py py-func docutils literal"><span class="pre">get_database()</span></code></a>)
+This expects documents in the database that look like:</p>
+<div class="highlight-python"><div class="highlight"><pre>{
+  &quot;type&quot; : &quot;macid_of_rasperry&lt;int&gt;&quot;, # i.e. value returned by :func:`himbeere.util.getmacid`
+  &quot;name&quot; : &quot;name of the code&quot;,
+  &quot;modules&quot; : { # these are modules used by this local code
+    &quot;name_of_module1&quot; : &quot;&lt;python code&gt;&quot;,
+    &quot;name_of_module2&quot; : &quot;&lt;python code&gt;&quot;,
+    ...
+  },
+  &quot;global_modules&quot; : { # these modules will be exported to *all*
+                       # code in this database
+    &quot;name_of_global1&quot; : &quot;&lt;python code&gt;&quot;,
+    &quot;name_of_global2&quot; : &quot;&lt;python code&gt;&quot;
+  },
+  &quot;code&quot; : &quot;&lt;python code&gt;&quot; # This is the main module, it *must* include a
+                           # `main` function
+}
+</pre></div>
+</div>
+<p><em>Note</em>, all of these are optional.  If e.g. <code class="docutils literal"><span class="pre">&quot;code&quot;</span></code> is omitted, then only
+<code class="docutils literal"><span class="pre">&quot;global_modules&quot;</span></code> will essentially have any effect as they will be exported
 to other code in the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">dict - dictionary of code available in the database</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="himbeerecouch.database.send_heartbeat">
 <code class="descclassname">himbeerecouch.database.</code><code class="descname">send_heartbeat</code><span class="sig-paren">(</span><em>db=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/database.html#send_heartbeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.database.send_heartbeat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update the heartbeat document.  kwargs are passed into the document and
-must be json serializable</p>
+<dd><blockquote>
+<div>Update the heartbeat document.  kwargs are passed into the document and
+must be json serializable</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>db</strong> (<em>str</em>) &#8211; database</li>
+<li><strong>kwargs</strong> &#8211; keywords (must be JSON-serializable) passed in to heartbeat document</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="himbeerecouch.database.set_server">
 <code class="descclassname">himbeerecouch.database.</code><code class="descname">set_server</code><span class="sig-paren">(</span><em>srvr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/database.html#set_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.database.set_server" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the current server that should be used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>srvr</strong> (<em>str</em>) &#8211; server name</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

@@ -47,13 +47,18 @@
 <div class="viewcode-block" id="set_server"><a class="viewcode-back" href="../../database.html#himbeerecouch.database.set_server">[docs]</a><span class="k">def</span> <span class="nf">set_server</span><span class="p">(</span><span class="n">srvr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the current server that should be used</span>
+
+<span class="sd">    :param srvr: server name</span>
+<span class="sd">    :type srvr: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_server</span>
     <span class="n">_server</span> <span class="o">=</span> <span class="n">srvr</span>
 </div>
 <div class="viewcode-block" id="get_acct"><a class="viewcode-back" href="../../database.html#himbeerecouch.database.get_acct">[docs]</a><span class="k">def</span> <span class="nf">get_acct</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    get the account object, type: cloudant.Account</span>
+<span class="sd">    get the account object</span>
+
+<span class="sd">    :rtype: cloudant.Account</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">_server</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Server not valid, not yet set!&quot;</span><span class="p">)</span>
@@ -64,7 +69,9 @@
 </div>
 <div class="viewcode-block" id="get_database"><a class="viewcode-back" href="../../database.html#himbeerecouch.database.get_database">[docs]</a><span class="k">def</span> <span class="nf">get_database</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    get the database object, type: cloudant.Database</span>
+<span class="sd">    get the database object</span>
+<span class="sd">    </span>
+<span class="sd">    :rtype: cloudant.Database</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">get_acct</span><span class="p">()[</span><span class="n">_database_name</span><span class="p">]</span>
 </div>
@@ -72,6 +79,11 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Update the heartbeat document.  kwargs are passed into the document and</span>
 <span class="sd">      must be json serializable</span>
+
+<span class="sd">    :param db: database</span>
+<span class="sd">    :type db: str </span>
+<span class="sd">    :param kwargs: keywords (must be JSON-serializable) passed in to heartbeat document</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">db</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">get_database</span><span class="p">()</span>
@@ -84,29 +96,31 @@
 </div>
 <div class="viewcode-block" id="get_processes_code"><a class="viewcode-back" href="../../database.html#himbeerecouch.database.get_processes_code">[docs]</a><span class="k">def</span> <span class="nf">get_processes_code</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    get the process code from the database</span>
-<span class="sd">    This expects documents that look like:</span>
+<span class="sd">    get the process code from the database (returned by :func:`get_database`)</span>
+<span class="sd">    This expects documents in the database that look like::</span>
 
-<span class="sd">    {</span>
-<span class="sd">      &quot;type&quot; : &quot;macid_of_rasperry&lt;int&gt;&quot;, # i.e. value returned by getmacid()</span>
-<span class="sd">      &quot;name&quot; : &quot;name of the code&quot;,</span>
-<span class="sd">      &quot;modules&quot; : { # these are modules used by this local code</span>
-<span class="sd">        &quot;name_of_module1&quot; : &quot;&lt;python code&gt;&quot;,</span>
-<span class="sd">        &quot;name_of_module2&quot; : &quot;&lt;python code&gt;&quot;,</span>
-<span class="sd">        ...</span>
-<span class="sd">      },</span>
-<span class="sd">      &quot;global_modules&quot; : { # these modules will be exported to *all*</span>
-<span class="sd">                           # code in this database</span>
-<span class="sd">        &quot;name_of_global1&quot; : &quot;&lt;python code&gt;&quot;,</span>
-<span class="sd">        &quot;name_of_global2&quot; : &quot;&lt;python code&gt;&quot;</span>
-<span class="sd">      },</span>
-<span class="sd">      &quot;code&quot; : &quot;&lt;python code&gt;&quot; # This is the main module, it *must* include a</span>
-<span class="sd">                               # `main` function</span>
-<span class="sd">    }</span>
+<span class="sd">        {</span>
+<span class="sd">          &quot;type&quot; : &quot;macid_of_rasperry&lt;int&gt;&quot;, # i.e. value returned by :func:`himbeere.util.getmacid`</span>
+<span class="sd">          &quot;name&quot; : &quot;name of the code&quot;,</span>
+<span class="sd">          &quot;modules&quot; : { # these are modules used by this local code</span>
+<span class="sd">            &quot;name_of_module1&quot; : &quot;&lt;python code&gt;&quot;,</span>
+<span class="sd">            &quot;name_of_module2&quot; : &quot;&lt;python code&gt;&quot;,</span>
+<span class="sd">            ...</span>
+<span class="sd">          },</span>
+<span class="sd">          &quot;global_modules&quot; : { # these modules will be exported to *all*</span>
+<span class="sd">                               # code in this database</span>
+<span class="sd">            &quot;name_of_global1&quot; : &quot;&lt;python code&gt;&quot;,</span>
+<span class="sd">            &quot;name_of_global2&quot; : &quot;&lt;python code&gt;&quot;</span>
+<span class="sd">          },</span>
+<span class="sd">          &quot;code&quot; : &quot;&lt;python code&gt;&quot; # This is the main module, it *must* include a</span>
+<span class="sd">                                   # `main` function</span>
+<span class="sd">        }</span>
 
-<span class="sd">    *Note*, all of these are optional.  If e.g. &quot;code&quot; is omitted, then only</span>
-<span class="sd">    &quot;global_modules&quot; will essentially have any effect as they will be exported</span>
+<span class="sd">    *Note*, all of these are optional.  If e.g. ``&quot;code&quot;`` is omitted, then only</span>
+<span class="sd">    ``&quot;global_modules&quot;`` will essentially have any effect as they will be exported</span>
 <span class="sd">    to other code in the database.</span>
+
+<span class="sd">    :returns: dict - dictionary of code available in the database</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">db</span> <span class="o">=</span> <span class="n">get_database</span><span class="p">()</span>
     <span class="n">aview</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">design</span><span class="p">(</span><span class="s">&quot;document_type&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s">&quot;document_type&quot;</span><span class="p">)</span>

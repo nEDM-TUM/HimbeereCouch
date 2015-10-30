@@ -15,7 +15,6 @@ Contents:
    daemon
    database
    util
-   misc
    log
    rpc
 

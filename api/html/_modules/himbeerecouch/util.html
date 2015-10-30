@@ -46,7 +46,11 @@
 
 <div class="viewcode-block" id="getmacid"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getmacid">[docs]</a><span class="k">def</span> <span class="nf">getmacid</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">      Get MAC id</span>
+<span class="sd">      Get MAC id of interface</span>
+
+<span class="sd">      :param interface: which interface to check, (if None, then &#39;etho&#39;)</span>
+<span class="sd">      :type interface: str</span>
+<span class="sd">      :rtype: int</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">interface</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">interface</span> <span class="o">=</span> <span class="s">&quot;eth0&quot;</span>
@@ -57,7 +61,11 @@
 </div>
 <div class="viewcode-block" id="getipaddr"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getipaddr">[docs]</a><span class="k">def</span> <span class="nf">getipaddr</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">      Get ip address</span>
+<span class="sd">      Get ip address of interface</span>
+
+<span class="sd">      :param interface: which interface to check, (if None, then &#39;etho&#39;)</span>
+<span class="sd">      :type interface: str</span>
+<span class="sd">      :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">netifaces</span> <span class="kn">as</span> <span class="nn">ni</span>
     <span class="k">if</span> <span class="n">interface</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -68,6 +76,8 @@
 <div class="viewcode-block" id="getserial"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getserial">[docs]</a><span class="k">def</span> <span class="nf">getserial</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Return serial number of RaspPi</span>
+
+<span class="sd">      :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># Extract serial from cpuinfo file</span>
     <span class="n">cpuserial</span> <span class="o">=</span> <span class="s">&quot;ERROR000000000&quot;</span>
@@ -85,6 +95,8 @@
 <div class="viewcode-block" id="getpassword"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.getpassword">[docs]</a><span class="k">def</span> <span class="nf">getpassword</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">      Get password, which is a combination of mac id and serial number</span>
+
+<span class="sd">      :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">getmacid</span><span class="p">())</span> <span class="o">+</span> <span class="n">getserial</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">())</span>
 </div>
@@ -125,8 +137,11 @@
 
 </div>
 <div class="viewcode-block" id="stack_trace"><a class="viewcode-back" href="../../util.html#himbeerecouch.util.stack_trace">[docs]</a><span class="k">def</span> <span class="nf">stack_trace</span><span class="p">(</span><span class="n">ignore_from</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Return stack trace as list of strings, ignoring beginning at the</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return stack trace as list of strings, ignoring beginning at the</span>
 <span class="sd">    function given (ignore_from).</span>
+
+<span class="sd">    See usage in :func:`himbeerecouch.rpc.RPCObject.output_handler`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">code</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">ignore_from</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>

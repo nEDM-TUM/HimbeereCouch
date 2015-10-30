@@ -50,25 +50,61 @@
 <dl class="function">
 <dt id="himbeerecouch.util.getipaddr">
 <code class="descclassname">himbeerecouch.util.</code><code class="descname">getipaddr</code><span class="sig-paren">(</span><em>interface=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/util.html#getipaddr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.util.getipaddr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get ip address</p>
+<dd><p>Get ip address of interface</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>interface</strong> (<em>str</em>) &#8211; which interface to check, (if None, then &#8216;etho&#8217;)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="himbeerecouch.util.getmacid">
 <code class="descclassname">himbeerecouch.util.</code><code class="descname">getmacid</code><span class="sig-paren">(</span><em>interface=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/util.html#getmacid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.util.getmacid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get MAC id</p>
+<dd><p>Get MAC id of interface</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>interface</strong> (<em>str</em>) &#8211; which interface to check, (if None, then &#8216;etho&#8217;)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="himbeerecouch.util.getpassword">
 <code class="descclassname">himbeerecouch.util.</code><code class="descname">getpassword</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/util.html#getpassword"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.util.getpassword" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get password, which is a combination of mac id and serial number</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="himbeerecouch.util.getserial">
 <code class="descclassname">himbeerecouch.util.</code><code class="descname">getserial</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/util.html#getserial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.util.getserial" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return serial number of RaspPi</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -76,6 +112,7 @@
 <code class="descclassname">himbeerecouch.util.</code><code class="descname">stack_trace</code><span class="sig-paren">(</span><em>ignore_from=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/util.html#stack_trace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.util.stack_trace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return stack trace as list of strings, ignoring beginning at the
 function given (ignore_from).</p>
+<p>See usage in <code class="xref py py-func docutils literal"><span class="pre">himbeerecouch.rpc.RPCObject.output_handler()</span></code></p>
 </dd></dl>
 
 <dl class="function">

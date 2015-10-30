@@ -40,7 +40,64 @@
   <div class="section" id="himbeerecouch-rpc">
 <h1>himbeerecouch.rpc<a class="headerlink" href="#himbeerecouch-rpc" title="Permalink to this headline">¶</a></h1>
 <p>Exceptions</p>
-<span class="target" id="module-himbeerecouch.rpc"></span></div>
+<span class="target" id="module-himbeerecouch.rpc"></span><dl class="class">
+<dt id="himbeerecouch.rpc.ProcessImporter">
+<em class="property">class </em><code class="descclassname">himbeerecouch.rpc.</code><code class="descname">ProcessImporter</code><span class="sig-paren">(</span><em>modules</em>, <em>exported_commands=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/rpc.html#ProcessImporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.rpc.ProcessImporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles importing classes/modules from code in database.</p>
+<p>See <a class="reference internal" href="#himbeerecouch.rpc.start_new_process" title="himbeerecouch.rpc.start_new_process"><code class="xref py py-func docutils literal"><span class="pre">start_new_process()</span></code></a> for an example of how this is used.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="himbeerecouch.rpc.RPCProxy">
+<em class="property">class </em><code class="descclassname">himbeerecouch.rpc.</code><code class="descname">RPCProxy</code><span class="sig-paren">(</span><em>address</em>, <em>authkey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/rpc.html#RPCProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.rpc.RPCProxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>RPCProxy, object running in child processes that connects to an <a class="reference internal" href="#himbeerecouch.rpc.RPCServer" title="himbeerecouch.rpc.RPCServer"><code class="xref py py-class docutils literal"><span class="pre">RPCServer</span></code></a>
+object.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="himbeerecouch.rpc.RPCServer">
+<em class="property">class </em><code class="descclassname">himbeerecouch.rpc.</code><code class="descname">RPCServer</code><span class="sig-paren">(</span><em>address</em>, <em>authkey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/rpc.html#RPCServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.rpc.RPCServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>RPC (Remote-Procedure-Call server)</p>
+<p>Calls remote procedures on all child processes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="himbeerecouch.rpc.id_generator">
+<code class="descclassname">himbeerecouch.rpc.</code><code class="descname">id_generator</code><span class="sig-paren">(</span><em>size=6</em>, <em>chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/rpc.html#id_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.rpc.id_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates random ID, used for private shared key between processes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="himbeerecouch.rpc.start_new_process">
+<code class="descclassname">himbeerecouch.rpc.</code><code class="descname">start_new_process</code><span class="sig-paren">(</span><em>name</em>, <em>code</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/himbeerecouch/rpc.html#start_new_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#himbeerecouch.rpc.start_new_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start new child process</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of child process</li>
+<li><strong>code</strong> (<em>dict</em>) &#8211; code to run, dictionary of modules (in string format)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(multiprocessing.Process, multiprocessing.Queue)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The Queue returned has the result returned from the child process:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;ok&quot;</span> <span class="p">:</span> <span class="bp">True</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>when everything ok, and:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;error&quot;</span> <span class="p">:</span> <span class="o">...</span><span class="n">traceback</span><span class="o">...</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>when not.</p>
+</dd></dl>
+
+</div>
 
 
           </div>
