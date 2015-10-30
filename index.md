@@ -33,8 +33,7 @@ See that documentation for instructions on how to update.
 (Note, one can do this once on a single Raspberry Pi, and
 copy the SD card for future Raspberry Pi.  If this is done, then you only need
 to start from step #3.)  For the nEDM experiment, we use an NFS boot so that
-the Rasp-Pis always have the same OS/software.  For more information about
-this, see [nEDM](nEDM).
+the Rasp-Pis always have the same OS/software.
 
 There are two options:
 
@@ -66,10 +65,10 @@ setup in the database:
 3. (Option 1) On local machine also connected to network, run:
 
 {% highlight python %}
-        >>> import himbeerecouch
-        >>> himbeerecouch.broadcast_message("http://server.name:5984")
-        # ... should return the following
-        { "MacID" : 1234566, "password" : "apassword" }
+>>> import himbeerecouch
+>>> himbeerecouch.broadcast_message("http://server.name:5984")
+# ... should return the following
+{ "MacID" : 1234566, "password" : "apassword" }
 {% endhighlight %}
 
   Sometimes this doesn't work (depending upon UDP forwarding on network).  If so, use (Option 2)
@@ -77,18 +76,17 @@ setup in the database:
 4. (Option 2) On Rasp Pi
 
 {% highlight python %}
-        >>> import himbeerecouch
-        >>> himbeerecouch.util.getmacid()
-        12345678901234L
-        >>> himbeerecouch.util.getpassword()
-        'apassword'
+>>> import himbeerecouch
+>>> himbeerecouch.util.getmacid()
+12345678901234L
+>>> himbeerecouch.util.getpassword()
+'apassword'
 {% endhighlight %}
 
 Use these credentials to set up a user on CouchDB with access to the chosen
 database (default `nedm/raspberries`).  (See [here]({{ site.url }}/System-Overview/sysbsystems/DB-Administration.html)
 for more information.)
 
-## In CouchDB
 ### Running code
 
 #### Single module mode
@@ -96,11 +94,11 @@ The Daemon expects documents to be submitted to the database (default
 `nedm/raspberries`) that look like:
 
 {% highlight python %}
-    {
-      "type" : MacID # This is an integer!
-      "name" : "Name of code"
-      "code" : "   ... python code here "
-    }
+{
+  "type" : MacID # This is an integer!
+  "name" : "Name of code"
+  "code" : "   ... python code here "
+}
 {% endhighlight %}
 
 It attempts to load the code in `"code"` as a module, and runs the `main`
@@ -108,34 +106,34 @@ function in the module.  The daemon will react whenever a new document is
 loaded/updated.  The code should look like:
 
 {% highlight python %}
- def main():
-     # This code is executed.  It has access to the following functions:
-     #     log(*args)  : logging function
-     #     should_quit()  : check if this code should exit (useful for daemons)
-     #     register_quit_notification(afunc)  : registers a quit notification, i.e. function 'afunc' is called when this code should exit
-     #     remove_quit_notification(afunc)  : deregisters a quit notification
+def main():
+    # This code is executed.  It has access to the following functions:
+    #     log(*args)  : logging function
+    #     should_quit()  : check if this code should exit (useful for daemons)
+    #     register_quit_notification(afunc)  : registers a quit notification, i.e. function 'afunc' is called when this code should exit
+    #     remove_quit_notification(afunc)  : deregisters a quit notification
 {% endhighlight %}
 
 #### Multiple module mode
 Note, that it is also possible to pass your code in _module_ form, for example:
 
 {% highlight python %}
-    {
-      "type" : "macid_of_rasperry<int>", # i.e. value returned by getmacid()
-      "name" : "name of the code",
-      "modules" : { # these are modules used by this local code
-        "name_of_module1" : "<python code>",
-        "name_of_module2" : "<python code>",
-        ...
-      },
-      "global_modules" : { # these modules will be exported to *all*
-                           # code in this database
-        "name_of_global1" : "<python code>",
-        "name_of_global2" : "<python code>"
-      },
-      "code" : "<python code>" # This is the main module, it *must* include a
-                               # `main` function
-    }
+{
+  "type" : "macid_of_rasperry<int>", # i.e. value returned by getmacid()
+  "name" : "name of the code",
+  "modules" : { # these are modules used by this local code
+    "name_of_module1" : "<python code>",
+    "name_of_module2" : "<python code>",
+    ...
+  },
+  "global_modules" : { # these modules will be exported to *all*
+                       # code in this database
+    "name_of_global1" : "<python code>",
+    "name_of_global2" : "<python code>"
+  },
+  "code" : "<python code>" # This is the main module, it *must* include a
+                           # `main` function
+}
 {% endhighlight %}
 
 *Note*, all of these are optional.  If e.g. `"code"` is omitted and there is no `"main"` in `"modules"`, then only
