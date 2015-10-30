@@ -42,7 +42,7 @@ def send_heartbeat(db=None, **kwargs):
 
     :param db: database
     :type db: str 
-	:param kwargs: keywords (must be JSON-serializable) passed in to heartbeat
+    :param kwargs: keywords (must be JSON-serializable) passed in to heartbeat
     document
 
     """
@@ -58,7 +58,7 @@ def send_heartbeat(db=None, **kwargs):
 def get_processes_code():
     """
     get the process code from the database (returned by :func:`get_database`)
-	This expects documents in the database that look like::
+    This expects documents in the database that look like::
 
         {
           "type" : "macid_of_rasperry<int>", # i.e. value returned by :func:`himbeere.util.getmacid`
