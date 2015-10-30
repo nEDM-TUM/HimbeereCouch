@@ -2,6 +2,11 @@ fierlingerwiki: https://fierlinger.wiki.tum.de/Administration+Page
 baseurl: /HimbeereCouch
 usertitle: himbeerecouch
 highlighter: pygments
-collections:
-  subsystems:
-    output: true
+include: 
+  - _modules
+  - _sources
+  - _static
+
+subsystems:
+  - url: /api/html
+    title: API documentation
