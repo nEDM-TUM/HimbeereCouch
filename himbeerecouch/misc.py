@@ -9,6 +9,12 @@ _broadcast_port = 53000
 _max_broadcast_packet = 65000
 
 def execute_cmd(dic):
+    """
+	Execute a shell command, result of command is saved in dic as "ret"
+
+    :param dic: dict, should contain "cmd"
+    :param type: dict
+    """
     import subprocess as _sp
     try:
         p = _sp.Popen(dic["cmd"], stderr=_sp.PIPE, stdout=_sp.PIPE)
@@ -22,6 +28,12 @@ def broadcast_message(server_name="", send_data=None, timeout=10):
       Broadcasts the desired couchdb server name to listening Raspberry Pis
 
       Waits and returns responses from any connected RPs.
+
+      :param server_name: name of server
+      :type server_name: str 
+      :param send_data: data to broadcast 
+      :param timeout: amount of time to wait before timeout 
+      :type timeout: int 
     """
 
     # Set up the socket

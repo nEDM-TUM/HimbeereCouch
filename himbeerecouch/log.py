@@ -19,6 +19,9 @@ class MPLogHandler(logging.Handler):
     This handler makes it possible for several processes
     to log to the same file by using a queue.
 
+    :param out_file: name of output file, if None then is output to stdout/stderr
+    :type out_file: str
+
     """
     def __init__(self, out_file = None):
         logging.Handler.__init__(self)

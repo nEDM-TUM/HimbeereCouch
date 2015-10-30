@@ -13,6 +13,9 @@ import signal
 import json
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+   """
+   Generates random ID, used for private shared key between processes
+   """
    return ''.join(random.choice(chars) for _ in range(size))
 
 _server = ('', 17000)
@@ -34,6 +37,11 @@ Complete""".format('\n   '.join(stack_trace(self.output_handler))))
 
 
 class RPCServer(RPCObject):
+    """
+    RPC (Remote-Procedure-Call server)
+
+    Calls remote procedures on all child processes
+    """
     def __init__(self, address, authkey):
         super(RPCServer, self).__init__()
         self._clients = {}
@@ -70,6 +78,10 @@ class RPCServer(RPCObject):
 
 
 class RPCProxy(RPCObject):
+    """
+	RPCProxy, object running in child processes that connects to an :class:`RPCServer`
+    object.
+    """
     def __init__(self, address, authkey):
         super(RPCProxy, self).__init__()
         self._functions = { }
@@ -133,6 +145,12 @@ class RaspServerProcess(RPCServer):
 
 
 class ProcessImporter(object):
+    """
+    Handles importing classes/modules from code in database.
+
+	See :func:`start_new_process` for an example of how this is used. 
+
+    """
     def __init__(self, modules, exported_commands = None):
         self._modules = modules
         if exported_commands is None:
@@ -161,6 +179,25 @@ class ProcessImporter(object):
 
 
 def start_new_process(name, code):
+    """
+      Start new child process
+
+      :param name: Name of child process
+      :type name: str
+      :param code: code to run, dictionary of modules (in string format) 
+      :type code: dict
+      :returns: (multiprocessing.Process, multiprocessing.Queue)
+
+      The Queue returned has the result returned from the child process::
+
+          { "ok" : True }
+
+      when everything ok, and::
+
+          { "error" : ...traceback... }
+
+      when not.
+    """
     def _new_proc(q):
         import sys
         o = RaspProxyProcess()

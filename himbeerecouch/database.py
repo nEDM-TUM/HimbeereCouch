@@ -7,13 +7,18 @@ _database_name = "nedm%2Fraspberries"
 def set_server(srvr):
     """
     Set the current server that should be used
+
+    :param srvr: server name
+    :type srvr: str
     """
     global _server
     _server = srvr
 
 def get_acct():
     """
-    get the account object, type: cloudant.Account
+    get the account object
+
+    :rtype: cloudant.Account
     """
     if _server is None:
         raise Exception("Server not valid, not yet set!")
@@ -24,7 +29,9 @@ def get_acct():
 
 def get_database():
     """
-    get the database object, type: cloudant.Database
+    get the database object
+    
+    :rtype: cloudant.Database
     """
     return get_acct()[_database_name]
 
@@ -32,6 +39,12 @@ def send_heartbeat(db=None, **kwargs):
     """
       Update the heartbeat document.  kwargs are passed into the document and
       must be json serializable
+
+    :param db: database
+    :type db: str 
+	:param kwargs: keywords (must be JSON-serializable) passed in to heartbeat
+    document
+
     """
     if db is None:
         db = get_database()
@@ -44,29 +57,31 @@ def send_heartbeat(db=None, **kwargs):
 
 def get_processes_code():
     """
-    get the process code from the database
-    This expects documents that look like:
+    get the process code from the database (returned by :func:`get_database`)
+	This expects documents in the database that look like::
 
-    {
-      "type" : "macid_of_rasperry<int>", # i.e. value returned by getmacid()
-      "name" : "name of the code",
-      "modules" : { # these are modules used by this local code
-        "name_of_module1" : "<python code>",
-        "name_of_module2" : "<python code>",
-        ...
-      },
-      "global_modules" : { # these modules will be exported to *all*
-                           # code in this database
-        "name_of_global1" : "<python code>",
-        "name_of_global2" : "<python code>"
-      },
-      "code" : "<python code>" # This is the main module, it *must* include a
-                               # `main` function
-    }
+        {
+          "type" : "macid_of_rasperry<int>", # i.e. value returned by :func:`himbeere.util.getmacid`
+          "name" : "name of the code",
+          "modules" : { # these are modules used by this local code
+            "name_of_module1" : "<python code>",
+            "name_of_module2" : "<python code>",
+            ...
+          },
+          "global_modules" : { # these modules will be exported to *all*
+                               # code in this database
+            "name_of_global1" : "<python code>",
+            "name_of_global2" : "<python code>"
+          },
+          "code" : "<python code>" # This is the main module, it *must* include a
+                                   # `main` function
+        }
 
-    *Note*, all of these are optional.  If e.g. "code" is omitted, then only
-    "global_modules" will essentially have any effect as they will be exported
+    *Note*, all of these are optional.  If e.g. ``"code"`` is omitted, then only
+    ``"global_modules"`` will essentially have any effect as they will be exported
     to other code in the database.
+
+    :returns: dict - dictionary of code available in the database
     """
     db = get_database()
     aview = db.design("document_type").view("document_type")

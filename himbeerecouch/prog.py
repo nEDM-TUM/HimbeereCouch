@@ -19,10 +19,14 @@ import logging
 _handled_signals = [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]
 
 class ShouldExit(Exception):
-    pass
+    """
+    Raised when exit is requested
+    """
 
 class ReloadDaemon(Exception):
-    pass
+    """
+    Raised to reload daemon
+    """
 
 class IDCache(object):
     def __init__(self):
@@ -65,6 +69,9 @@ class IDCache(object):
 
 
 def listen_daemon(ids, daemon):
+    """
+    Listen for changes in code in the database.
+    """
     while 1:
         try:
             adb = get_database()
@@ -108,6 +115,15 @@ def listen_daemon(ids, daemon):
             time.sleep(5)
 
 class ListenDaemon(object):
+    """
+	Utility class that handles starting/stopping listening (e.g.
+	:func:`listen_daemon` and starts and stops logging of child processes.
+
+    Example calling::
+
+        with ListenDaemon(ids, self):
+            ... # Perform code here while listening
+    """
     def __init__(self, ids, daemon):
         self.ids = ids
         self.daemon = daemon
@@ -232,6 +248,14 @@ class RaspberryDaemon(Daemon):
 
 
 def run_daemon(cmd, sf, apath):
+    """
+    Run daemon in non-blocking mode.
+
+    :param sf: name of server file (path)
+    :type sf: str 
+    :param apath: path to output logs/pid files 
+    :type apath: str 
+    """
     join = os.path.join
     daemon = RaspberryDaemon(join(apath, 'rspby_daemon.pid'),
                              stdout=join(apath, 'rspby_daemon.log'),
@@ -248,6 +272,12 @@ def run_daemon(cmd, sf, apath):
         print "usage: start|stop|restart|reload"
 
 def run(sf):
+    """
+    Run daemon in blocking mode (e.g. with supervisord)
+
+    :param sf: name of server file (path)
+    :type sf: str 
+    """
     daemon = RaspberryDaemon("/dev/null",
                              server_file=sf)
     daemon.run()

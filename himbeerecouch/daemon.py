@@ -8,7 +8,9 @@ from .log import set_logging_file
 """
 
 class ForceRestart(Exception):
-    pass
+    """
+    Exception thrown to request a full restart
+    """
 
 class Daemon:
     """

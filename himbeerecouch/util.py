@@ -6,7 +6,11 @@ import traceback
 
 def getmacid(interface=None):
     """
-      Get MAC id
+      Get MAC id of interface
+
+      :param interface: which interface to check, (if None, then 'etho')
+      :type interface: str
+      :rtype: int
     """
     if interface is None:
         interface = "eth0"
@@ -17,7 +21,11 @@ def getmacid(interface=None):
 
 def getipaddr(interface=None):
     """
-      Get ip address
+      Get ip address of interface
+
+      :param interface: which interface to check, (if None, then 'etho')
+      :type interface: str
+      :rtype: str
     """
     import netifaces as ni
     if interface is None:
@@ -28,6 +36,8 @@ def getipaddr(interface=None):
 def getserial():
     """
       Return serial number of RaspPi
+
+      :rtype: str
     """
     # Extract serial from cpuinfo file
     cpuserial = "ERROR000000000"
@@ -45,6 +55,8 @@ def getserial():
 def getpassword():
     """
       Get password, which is a combination of mac id and serial number
+
+      :rtype: str
     """
     return str(hashlib.sha1(str(getmacid()) + getserial()).hexdigest())
 
@@ -85,8 +97,11 @@ def stop_blinking(v):
 
 
 def stack_trace(ignore_from=None):
-    """ Return stack trace as list of strings, ignoring beginning at the
+    """
+    Return stack trace as list of strings, ignoring beginning at the
     function given (ignore_from).
+
+    See usage in :func:`himbeerecouch.rpc.RPCObject.output_handler`
     """
     code = []
     if ignore_from is None:
