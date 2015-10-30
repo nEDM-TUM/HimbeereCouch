@@ -42,8 +42,7 @@ def send_heartbeat(db=None, **kwargs):
 
     :param db: database
     :type db: str 
-    :param kwargs: keywords (must be JSON-serializable) passed in to heartbeat
-    document
+    :param kwargs: keywords (must be JSON-serializable) passed in to heartbeat document
 
     """
     if db is None:
