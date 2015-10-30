@@ -145,18 +145,18 @@ to other code in the database.
 The daemon will respond to the insertion of a document that look like:
 
 {% highlight python %}
-    {
-      "type" : "MacID_cmd" # MacID is an integer in the string!
-      "cmd" : [ "acommand", "flag1", "flag2" ... ]
-    }
+{
+  "type" : "MacID_cmd" # MacID is an integer in the string!
+  "cmd" : [ "acommand", "flag1", "flag2" ... ]
+}
 {% endhighlight %}
 
 and update the document to be:
 
 {% highlight python %}
-    {
-      "type" : "MacID_cmd" # MacID is an integer in the string!
-      "cmd" : [ "acommand", "flag1", "flag2" ... ],
-      "ret" : [ "return string from accomand" ]
-    }
+{
+  "type" : "MacID_cmd" # MacID is an integer in the string!
+  "cmd" : [ "acommand", "flag1", "flag2" ... ],
+  "ret" : [ "return string from accomand" ]
+}
 {% endhighlight %}
