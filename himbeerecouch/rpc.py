@@ -79,7 +79,7 @@ class RPCServer(RPCObject):
 
 class RPCProxy(RPCObject):
     """
-	RPCProxy, object running in child processes that connects to an :class:`RPCServer`
+    RPCProxy, object running in child processes that connects to an :class:`RPCServer`
     object.
     """
     def __init__(self, address, authkey):
@@ -148,7 +148,7 @@ class ProcessImporter(object):
     """
     Handles importing classes/modules from code in database.
 
-	See :func:`start_new_process` for an example of how this is used. 
+    See :func:`start_new_process` for an example of how this is used.
 
     """
     def __init__(self, modules, exported_commands = None):
@@ -184,7 +184,7 @@ def start_new_process(name, code):
 
       :param name: Name of child process
       :type name: str
-      :param code: code to run, dictionary of modules (in string format) 
+      :param code: code to run, dictionary of modules (in string format)
       :type code: dict
       :returns: (multiprocessing.Process, multiprocessing.Queue)
 
