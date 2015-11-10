@@ -86,7 +86,7 @@ setup in the database:
 {% endhighlight %}
 
 Use these credentials to set up a user on CouchDB with access to the chosen
-database (default `nedm/raspberries`).  (See [here]({{ site.url }}/System-Overview/subsystems/DB-Administration.html)
+database (default `nedm/raspberries`).  (See [here]({{ site.url }}/nEDM-Interface/tutorial-couchdb_users.html)
 for more information.)
 
 ### Running code
