@@ -59,6 +59,8 @@ then:
 
 2. Connect Rasp Pi to network.
 
+### Determine credentials
+
 Once connected, there are two options to determine which password/user name to
 setup in the database:
 
@@ -84,7 +86,7 @@ setup in the database:
 {% endhighlight %}
 
 Use these credentials to set up a user on CouchDB with access to the chosen
-database (default `nedm/raspberries`).  (See [here]({{ site.url }}/System-Overview/sysbsystems/DB-Administration.html)
+database (default `nedm/raspberries`).  (See [here]({{ site.url }}/System-Overview/subsystems/DB-Administration.html)
 for more information.)
 
 ### Running code
