@@ -7,7 +7,7 @@ setup(
   url='https://github.com/nEDM-TUM/HimbeereCouch',
   author='Michael Marino',
   author_email='mmarino@gmail.com',
-  install_requires=['pynedm==0.1.0', 'netifaces'],
+  install_requires=['pynedm', 'netifaces'],
   dependency_links=[
     "https://github.com/nEDM-TUM/Python-Slow-Control/tarball/master#egg=pynedm-0.1.0"
   ]
