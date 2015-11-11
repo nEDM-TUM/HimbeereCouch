@@ -1,4 +1,4 @@
-import cloudant
+import pynedm
 from .util import getmacid, getpassword
 
 _server = None
@@ -22,10 +22,11 @@ def get_acct():
     """
     if _server is None:
         raise Exception("Server not valid, not yet set!")
-    acct = cloudant.Account(_server)
-    if acct.login(str(getmacid()), str(getpassword())).status_code != 200:
-        raise Exception("Server ({}) credentials invalid!".format(_server))
-    return acct
+    po = pynedm.ProcessObject(uri=_server,
+      username = str(getmacid()),
+      password = str(getpassword())
+    )
+    return po.acct
 
 def get_database():
     """
