@@ -200,6 +200,9 @@ def start_new_process(name, code):
     """
     def _new_proc(q):
         import sys
+        # Use broadcaster from pynedm
+        import pynedm.log as plog
+        plog.use_broadcaster()
         o = RaspProxyProcess()
         sys.meta_path.append(
           ProcessImporter(code,
