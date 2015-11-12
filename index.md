@@ -18,7 +18,7 @@ updated on the [web interface](http://db.nedm1/page/control/nedm/raspberries).
 
 With pip:
 {% highlight bash %}
-pip install [--upgrade] https://github.com/nEDM-TUM/HimbeereCouch/tarball/master#egg=himbeerecouch
+pip install --upgrade --process-dependency-links https://github.com/nEDM-TUM/HimbeereCouch/tarball/master#egg=himbeerecouch
 {% endhighlight %}
 
 ### Requirements
